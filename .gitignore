@@ -1,0 +1,11 @@
+*.o
+*.obj
+*.hex
+*.bin
+*.lst
+*.map
+*.d
+*_build.log
+*.htm
+*.su
+*.su.lsu
