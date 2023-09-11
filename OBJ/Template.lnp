@@ -41,7 +41,18 @@
 "..\obj\delay.o"
 "..\obj\sys.o"
 "..\obj\usart.o"
---strict --scatter "..\OBJ\Template.sct"
+"..\obj\adc.o"
+"..\obj\common.o"
+"..\obj\dma.o"
+"..\obj\gpio.o"
+"..\obj\task.o"
+"..\obj\time3.o"
+"..\obj\time14.o"
+"..\obj\uart2.o"
+"..\obj\uart3.o"
+"..\obj\uart4.o"
+"..\obj\uart5.o"
+--library_type=microlib --strict --scatter "..\OBJ\Template.sct"
 --summary_stderr --info summarysizes --map --load_addr_map_info --xref --callgraph --symbols
 --info sizes --info totals --info unused --info veneers
 --list "..\OBJ\Template.map" -o ..\OBJ\Template.axf
