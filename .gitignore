@@ -1,4 +1,3 @@
-
 *.bak 
 *.ddk 
 *.edk 
@@ -19,7 +18,6 @@
 *.tra 
 *.dep            
 JLinkLog.txt 
-
 *.iex 
 *.htm 
 *.sct 

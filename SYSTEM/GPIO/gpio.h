@@ -3,8 +3,7 @@
 #include "common.h"
 
 // LED端口定义
-#define LED0 PFout(9)  // DS0
-#define LED1 PFout(10) // DS1
+#define LED PCout(13)  // LED0
 
-void gpio_Init(void); // 初始化
+void gpio_init(void); // 初始化
 #endif

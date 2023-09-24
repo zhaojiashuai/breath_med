@@ -6,6 +6,7 @@
 #include "stm32f4xx_conf.h"
 #include "usart.h"
 #include "task.h"
+#include "gpio.h"
 #include <stdio.h>
 #include <stdlib.h>
 
