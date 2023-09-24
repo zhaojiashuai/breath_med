@@ -1,20 +1,6 @@
 #ifndef __DMA_H
-#define __DMA_H	
+#define __DMA_H
 #include "common.h"
- 							   
-#endif 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+void bsp_InitAdcDMA(void);
+#endif
