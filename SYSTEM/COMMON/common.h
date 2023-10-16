@@ -5,8 +5,17 @@
 #include "stm32f4xx.h"
 #include "stm32f4xx_conf.h"
 #include "usart.h"
+#include "uart2.h"
+#include "uart3.h"
+#include "uart4.h"
+#include "uart5.h"
 #include "task.h"
 #include "gpio.h"
+#include "dma.h"
+#include "adc.h"
+#include "EXIT.h"
+#include "time3.h"
+#include "time14.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include "stm32f4xx_rcc.h"

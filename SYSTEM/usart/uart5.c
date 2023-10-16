@@ -2,49 +2,52 @@
 
 void uart5_init(u32 bound)
 {
-    USART_InitTypeDef USART_InitStructure;
-    GPIO_InitTypeDef GPIO_InitStructure;
-    NVIC_InitTypeDef NVIC_InitStructure;
+    // 使能UART5时钟
+    RCC_APB1PeriphClockCmd(RCC_APB1Periph_UART5, ENABLE);
 
-    RCC_APB1PeriphClockCmd(RCC_APB1Periph_UART5, ENABLE);                        // 使能UART5，GPIOB时钟
-    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC | RCC_AHB1Periph_GPIOD, ENABLE); // 使能GPIOC/D时钟
+    // 配置串口引脚
+    GPIO_InitTypeDef GPIO_InitStruct;
+    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC | RCC_AHB1Periph_GPIOD, ENABLE);
+    GPIO_InitStruct.GPIO_Pin = GPIO_Pin_12;
+    GPIO_InitStruct.GPIO_Mode = GPIO_Mode_AF;
+    GPIO_InitStruct.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_InitStruct.GPIO_OType = GPIO_OType_PP;
+    GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_NOPULL;
+    GPIO_Init(GPIOC, &GPIO_InitStruct);
 
-  	// 串口5对应引脚复用映射
-	GPIO_PinAFConfig(GPIOC, GPIO_PinSource12, GPIO_AF_UART5);  // GPIOC12复用为USART5
-	GPIO_PinAFConfig(GPIOD, GPIO_PinSource2, GPIO_AF_UART5); // GPIOD2复用为USART5
+    GPIO_InitStruct.GPIO_Pin = GPIO_Pin_2;
+    GPIO_InitStruct.GPIO_Mode = GPIO_Mode_AF;
+    GPIO_InitStruct.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_InitStruct.GPIO_OType = GPIO_OType_PP;
+    GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_NOPULL;
+    GPIO_Init(GPIOD, &GPIO_InitStruct);
 
-	// USART5端口配置
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_12; // GPIOC12
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;			// 复用功能
-	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;		// 速度50MHz
-	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;			// 推挽复用输出
-	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;			// 上拉
-	GPIO_Init(GPIOC, &GPIO_InitStructure);					// 初始化PC12   
+    // 将引脚设置为串口功能
+    GPIO_PinAFConfig(GPIOC, GPIO_PinSource12, GPIO_AF_UART5);
+    GPIO_PinAFConfig(GPIOD, GPIO_PinSource2, GPIO_AF_UART5);
 
-	// USART5端口配置
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_2; // GPIOD2
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;			// 复用功能
-	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;		// 速度50MHz
-	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;			// 推挽复用输出
-	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;			// 上拉
-	GPIO_Init(GPIOD, &GPIO_InitStructure);					// 初始化PD2         
+    // 配置UART5参数
+    USART_InitTypeDef USART_InitStruct;
+    USART_InitStruct.USART_BaudRate = bound;
+    USART_InitStruct.USART_WordLength = USART_WordLength_8b;
+    USART_InitStruct.USART_StopBits = USART_StopBits_1;
+    USART_InitStruct.USART_Parity = USART_Parity_No;
+    USART_InitStruct.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
+    USART_InitStruct.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
+    USART_Init(UART5, &USART_InitStruct);
 
-    NVIC_InitStructure.NVIC_IRQChannel = UART5_IRQn;
-    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1; // 抢占优先级3
-    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 5;        // 子优先级3
-    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;           // IRQ通道使能
-    NVIC_Init(&NVIC_InitStructure);                           // 根据指定的参数初始化VIC寄存器
+    // 使能串口接收中断
+    USART_ITConfig(UART5, USART_IT_RXNE, ENABLE);
 
-    USART_InitStructure.USART_BaudRate = bound;
-    USART_InitStructure.USART_WordLength = USART_WordLength_8b;
-    USART_InitStructure.USART_StopBits = USART_StopBits_1;
-    USART_InitStructure.USART_Parity = USART_Parity_No;
-    USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
-    USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
-    USART_Init(UART5, &USART_InitStructure);
+    // 使能串口
+    USART_Cmd(UART5, ENABLE);
 
-    USART_ITConfig(UART5, USART_IT_RXNE, ENABLE); // 开启中断
-    USART_Cmd(UART5, ENABLE);                     // 使能串口
+    // 配置串口中断优先级
+    NVIC_InitTypeDef NVIC_InitStruct;
+    NVIC_InitStruct.NVIC_IRQChannel = UART5_IRQn;
+    NVIC_InitStruct.NVIC_IRQChannelPreemptionPriority = 0;
+    NVIC_InitStruct.NVIC_IRQChannelCmd = ENABLE;
+    NVIC_Init(&NVIC_InitStruct);
 }
 
 // buf:发送区首地址

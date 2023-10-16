@@ -2,46 +2,45 @@
 
 void uart3_init(u32 bound)
 {
-    GPIO_InitTypeDef GPIO_InitStructure;
-    USART_InitTypeDef USART_InitStructure;
-    NVIC_InitTypeDef NVIC_InitStructure;
+    // 使能USART3时钟
+    RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART3, ENABLE);
 
-    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOB, ENABLE);  // 使能GPIOB时钟
-    RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART3, ENABLE); // 使能USART3时钟
+    // 配置串口引脚
+    GPIO_InitTypeDef GPIO_InitStruct;
+    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOB, ENABLE);
+    GPIO_InitStruct.GPIO_Pin = GPIO_Pin_10 | GPIO_Pin_11;
+    GPIO_InitStruct.GPIO_Mode = GPIO_Mode_AF;
+    GPIO_InitStruct.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_InitStruct.GPIO_OType = GPIO_OType_PP;
+    GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_NOPULL;
+    GPIO_Init(GPIOB, &GPIO_InitStruct);
 
- 	// 串口3对应引脚复用映射
-	GPIO_PinAFConfig(GPIOB, GPIO_PinSource10, GPIO_AF_USART3);  // GPIOB10复用为USART3
-	GPIO_PinAFConfig(GPIOB, GPIO_PinSource11, GPIO_AF_USART3); // GPIOB11复用为USART3
+    // 将引脚设置为串口功能
+    GPIO_PinAFConfig(GPIOB, GPIO_PinSource10, GPIO_AF_USART3);
+    GPIO_PinAFConfig(GPIOB, GPIO_PinSource11, GPIO_AF_USART3);
 
-	// USART3端口配置
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_10 | GPIO_Pin_11; // GPIOB10与GPIOB11
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;			// 复用功能
-	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;		// 速度50MHz
-	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;			// 推挽复用输出
-	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;			// 上拉
-	GPIO_Init(GPIOB, &GPIO_InitStructure);					// 初始化PB10，PB11   
+    // 配置USART3参数
+    USART_InitTypeDef USART_InitStruct;
+    USART_InitStruct.USART_BaudRate = bound;
+    USART_InitStruct.USART_WordLength = USART_WordLength_8b;
+    USART_InitStruct.USART_StopBits = USART_StopBits_1;
+    USART_InitStruct.USART_Parity = USART_Parity_No;
+    USART_InitStruct.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
+    USART_InitStruct.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
+    USART_Init(USART3, &USART_InitStruct);
 
-    RCC_APB1PeriphResetCmd(RCC_APB1Periph_USART3, ENABLE);  // 复位串口2
-    RCC_APB1PeriphResetCmd(RCC_APB1Periph_USART3, DISABLE); // 停止复位
+    // 使能串口接收中断
+    USART_ITConfig(USART3, USART_IT_RXNE, ENABLE);
 
-    USART_InitStructure.USART_BaudRate = bound;                                     // 波特率设置
-    USART_InitStructure.USART_WordLength = USART_WordLength_8b;                     // 8位数据长度
-    USART_InitStructure.USART_StopBits = USART_StopBits_1;                          // 一个停止位
-    USART_InitStructure.USART_Parity = USART_Parity_No;                             /// 奇偶校验位
-    USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None; // 无硬件数据流控制
-    USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;                 // 收发模式
+    // 使能串口
+    USART_Cmd(USART3, ENABLE);
 
-    USART_Init(USART3, &USART_InitStructure); // 初始化串口
-
-    NVIC_InitStructure.NVIC_IRQChannel = USART3_IRQn;         // 使能串口2中断
-    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1; // 先占优先级2级
-    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 3;        // 从优先级2级
-    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;           // 使能外部中断通道
-    NVIC_Init(&NVIC_InitStructure);                           // 根据NVIC_InitStruct中指定的参数初始化外设NVIC寄存器
-
-    USART_ITConfig(USART3, USART_IT_RXNE, ENABLE); // 开启中断
-
-    USART_Cmd(USART3, ENABLE); // 使能串口
+    // 配置串口中断优先级
+    NVIC_InitTypeDef NVIC_InitStruct;
+    NVIC_InitStruct.NVIC_IRQChannel = USART3_IRQn;
+    NVIC_InitStruct.NVIC_IRQChannelPreemptionPriority = 0;
+    NVIC_InitStruct.NVIC_IRQChannelCmd = ENABLE;
+    NVIC_Init(&NVIC_InitStruct);
 }
 
 // buf:发送区首地址
@@ -62,7 +61,6 @@ void uart3_printf(u8 *buf, u8 len)
 void USART3_IRQHandler(void)
 {
     u8 res;
-    // static u8  cnt;
     if (USART_GetITStatus(USART3, USART_IT_RXNE) != RESET) // 接收到数据
     {
         USART_ClearITPendingBit(USART3, USART_IT_RXNE); // 清除中断标志位

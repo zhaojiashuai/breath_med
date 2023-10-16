@@ -338,7 +338,7 @@
               <MiscControls></MiscControls>
               <Define>STM32F40_41xxx,USE_STDPERIPH_DRIVER</Define>
               <Undefine></Undefine>
-              <IncludePath>..\CORE;..\SYSTEM\delay;..\SYSTEM\sys;..\SYSTEM\usart;..\USER;..\FWLIB\inc;..\SYSTEM\ADC;..\SYSTEM\COMMON;..\SYSTEM\DMA;..\SYSTEM\GPIO;..\SYSTEM\TASK;..\SYSTEM\TIME;..\SYSTEM\usart</IncludePath>
+              <IncludePath>..\CORE;..\SYSTEM\delay;..\SYSTEM\sys;..\SYSTEM\usart;..\USER;..\FWLIB\inc;..\SYSTEM\ADC;..\SYSTEM\COMMON;..\SYSTEM\DMA;..\SYSTEM\GPIO;..\SYSTEM\TASK;..\SYSTEM\TIME;..\SYSTEM\usart;..\SYSTEM\EXIT</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -661,6 +661,11 @@
               <FileName>uart5.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\SYSTEM\usart\uart5.c</FilePath>
+            </File>
+            <File>
+              <FileName>EXIT.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\SYSTEM\EXIT\EXIT.c</FilePath>
             </File>
           </Files>
         </Group>
