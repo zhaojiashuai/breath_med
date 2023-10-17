@@ -1,5 +1,7 @@
 #include "uart5.h"
 
+oxygen_t  input = {0};
+
 void uart5_init(u32 bound)
 {
     // 使能UART5时钟
@@ -45,7 +47,7 @@ void uart5_init(u32 bound)
     // 配置串口中断优先级
     NVIC_InitTypeDef NVIC_InitStruct;
     NVIC_InitStruct.NVIC_IRQChannel = UART5_IRQn;
-    NVIC_InitStruct.NVIC_IRQChannelPreemptionPriority = 0;
+    NVIC_InitStruct.NVIC_IRQChannelPreemptionPriority = 4;
     NVIC_InitStruct.NVIC_IRQChannelCmd = ENABLE;
     NVIC_Init(&NVIC_InitStruct);
 }
@@ -65,14 +67,27 @@ void uart5_printf(u8 *buf, u8 len)
         ;
 }
 
-void UART5_IRQHandler(void)
+void UART5_IRQHandler(void)//16 09 01 01 F4 00 64 00 D2 00 00 B5
 {
-    u8 res;
-    // static u8  cnt;
+    static u8 cnt=0;
+    static u8 uart5[100]={0};
     if (USART_GetITStatus(UART5, USART_IT_RXNE) != RESET) // 接收到数据
     {
         USART_ClearITPendingBit(UART5, USART_IT_RXNE); // 清除中断标志位
-        res = USART_ReceiveData(UART5);                // 读取接收到的数据
-        USART_SendData(UART5, res);
+        uart5[cnt++] = USART_ReceiveData(UART5);                // 读取接收到的数据
+        if(uart5[0]!=0x16)
+        {
+            cnt = 0;
+        }
+        else
+        {
+            if(cnt>=11)
+            {
+                input.oxygen = uart5[3]*256+uart5[4];
+                input.flow = uart5[5]*256+uart5[6];
+                input.temp = uart5[7]*256+uart5[8];
+                cnt = 0;
+            }
+        }
     }
 }

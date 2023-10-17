@@ -28,6 +28,14 @@ typedef struct common
     uint16_t index;
 } filter_t, *filter_ptr;
 
+typedef struct sensor
+{
+    int16_t oxygen;
+    int16_t flow;
+    int16_t temp;
+}oxygen_t,*oxygen_ptr;
+
+
 int clampFilter(int value, int minValue, int maxValue);
 float sliding_average_filter(filter_t *data, float input);
 float median_filter(filter_t *data, float input);

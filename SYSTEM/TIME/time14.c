@@ -43,15 +43,18 @@ void TIM14_PWM_Init(u32 arr, u32 psc)
 
     TIM_Cmd(TIM14, ENABLE); // 使能TIM14
 }
-
-void TIM2_Configuration(void)
+/*
+计数频率 = 时钟源频率 / (预分频值 + 1)
+定时时间 = 自动重载计数值 / 计数频率
+*/
+void TIM2_Configuration(void)//1ms
 {
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
 
     TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
-    TIM_TimeBaseStructure.TIM_Prescaler = 42000 - 1; // 根据需要调整分频系数
+    TIM_TimeBaseStructure.TIM_Prescaler = 168 - 1; // 根据需要调整分频系数
     TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
-    TIM_TimeBaseStructure.TIM_Period = 2000 - 1; // 根据需要调整计数周期
+    TIM_TimeBaseStructure.TIM_Period = 1000 - 1; // 根据需要调整计数周期
     TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV1;
     TIM_TimeBaseStructure.TIM_RepetitionCounter = 0;
     
@@ -62,7 +65,7 @@ void TIM2_Configuration(void)
 
     NVIC_InitTypeDef NVIC_InitStructure;
     NVIC_InitStructure.NVIC_IRQChannel = TIM2_IRQn;
-    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 2;
     NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
     NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
     NVIC_Init(&NVIC_InitStructure);

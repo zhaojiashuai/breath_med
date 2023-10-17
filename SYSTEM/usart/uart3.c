@@ -1,5 +1,7 @@
 #include "uart3.h"
 
+oxygen_t output = {0};
+
 void uart3_init(u32 bound)
 {
     // 使能USART3时钟
@@ -38,7 +40,7 @@ void uart3_init(u32 bound)
     // 配置串口中断优先级
     NVIC_InitTypeDef NVIC_InitStruct;
     NVIC_InitStruct.NVIC_IRQChannel = USART3_IRQn;
-    NVIC_InitStruct.NVIC_IRQChannelPreemptionPriority = 0;
+    NVIC_InitStruct.NVIC_IRQChannelPreemptionPriority = 2;
     NVIC_InitStruct.NVIC_IRQChannelCmd = ENABLE;
     NVIC_Init(&NVIC_InitStruct);
 }
@@ -60,11 +62,25 @@ void uart3_printf(u8 *buf, u8 len)
 
 void USART3_IRQHandler(void)
 {
-    u8 res;
+    static u8 cnt = 0;
+    static u8 uart3[100] = {0};
     if (USART_GetITStatus(USART3, USART_IT_RXNE) != RESET) // 接收到数据
     {
         USART_ClearITPendingBit(USART3, USART_IT_RXNE); // 清除中断标志位
-        res = USART_ReceiveData(USART3);                // 读取接收到的数据
-        USART_SendData(USART3, res);
+        uart3[cnt++] = USART_ReceiveData(USART3);       // 读取接收到的数据
+        if (uart3[0] != 0x16)
+        {
+            cnt = 0;
+        }
+        else
+        {
+            if (cnt >= 11)
+            {
+                output.oxygen = uart3[3] * 256 + uart3[4];
+                output.flow = uart3[5] * 256 + uart3[6];
+                output.temp = uart3[7] * 256 + uart3[8];
+                cnt = 0;
+            }
+        }
     }
 }
