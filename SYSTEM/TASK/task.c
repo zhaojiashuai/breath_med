@@ -62,6 +62,7 @@ void run_tasks(void)
 
 void task1(void)
 {
+    compressor_set(1,1,1);
     printf("Task 1 executed!\n");
 }
 
@@ -74,7 +75,7 @@ void task2(void)
 void init_task(void)
 {
     add_task(task1, 10000);
-    add_task(task2, 20000);
+    add_task(task2, 50000);
 }
 
 ////////////////////////////////////////////////////////////example///////////////////////////////////////////////////////////////////////////////
