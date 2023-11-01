@@ -55,10 +55,19 @@ void TIM3_Int_Init(u16 arr, u16 psc)
 
     // 使能定时器3
     TIM_Cmd(TIM3, ENABLE);
-    TIM_SetCompare1(TIM3,arr/2);
-    TIM_SetCompare2(TIM3,arr/2);
+    TIM_SetCompare1(TIM3, arr / 2);
+    TIM_SetCompare2(TIM3, arr / 2);
 }
 
 // TIM_SetCompare1(TIM3,led0pwmval);	//修改比较值，修改占空比
 
-
+void test_pwm(void)
+{
+    static uint16_t count = 0;
+    if (count++ > 500)
+    {
+        count = 0;
+    }
+    TIM_SetCompare1(TIM3, count);
+    TIM_SetCompare2(TIM3, count);
+}

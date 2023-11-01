@@ -27,3 +27,12 @@ void bsp_InitAdcDMA(void)
     DMA_Init(DMA2_Stream0, &DMA_InitStruct);
     DMA_Cmd(DMA2_Stream0, ENABLE);
 }
+
+uint16_t get_adc_value(uint8_t ch)
+{
+    if (ch > 9)
+    {
+        return 0;
+    }
+    return AdcValues[ch];
+}

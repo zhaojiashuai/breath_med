@@ -62,19 +62,24 @@ void run_tasks(void)
 
 void task1(void)
 {
-    compressor_set(1,1,1);
+    compressor_set(1, 1, 1);
+    test_pwm();
     printf("Task 1 executed!\n");
 }
 
 void task2(void)
 {
     LED = !LED;
+    TEST_IO1 = !TEST_IO1;
+    TEST_IO2 = !TEST_IO2;
+    TEST_IO3 = !TEST_IO3;
+    TEST_IO4 = !TEST_IO4;
     printf("Task 2 executed!\n");
 }
 
 void init_task(void)
 {
-    add_task(task1, 10000);
+    add_task(task1, 10000); // 100ms
     add_task(task2, 50000);
 }
 
