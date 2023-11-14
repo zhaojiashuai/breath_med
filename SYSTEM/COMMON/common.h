@@ -16,8 +16,10 @@
 #include "EXIT.h"
 #include "time3.h"
 #include "time14.h"
+#include "sensor.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "stm32f4xx_rcc.h"
 
 #define BUFFER_SIZE 10

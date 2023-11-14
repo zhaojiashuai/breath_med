@@ -7,4 +7,5 @@
 
 void uart2_init(u32 bound);
 void compressor_set(int16_t dat, int16_t speed,int16_t fan);
+void uart2_printf(u8 *buf, u16 len);
 #endif

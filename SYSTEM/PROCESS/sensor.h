@@ -2,5 +2,5 @@
 #define __SENSOR_H
 #include "common.h"
 
-
+void get_sensor_value(void);
 #endif
