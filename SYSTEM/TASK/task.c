@@ -63,8 +63,6 @@ void run_tasks(void)
 extern display_t sensor;
 void task1(void)
 {
-    // compressor_set(1, 1, 1);
-    test_pwm();
     get_sensor_value();
     // printf("Task 1 executed!\n");
 }
@@ -72,12 +70,8 @@ void task1(void)
 void task2(void)
 {
     LED = !LED;
-    TEST_IO1 = !TEST_IO1;
-    TEST_IO2 = !TEST_IO2;
-    TEST_IO3 = !TEST_IO3;
-    TEST_IO4 = !TEST_IO4;
+    set_sensor_value();
     // printf("Task 2 executed!\n");
-    printf("pre1:%d,pre2:%d,pre3:%d,pre4:%d\r\n",sensor.breath_pre,sensor.set_breath_pre,sensor.set_flow2,sensor.flow2);
 }
 
 void task3(void)
@@ -91,9 +85,9 @@ void task3(void)
 
 void init_task(void)
 {
-    add_task(task1, 10000);  // 100ms
-    add_task(task2, 100000);  // 2000ms
-    add_task(task3, 200000); // 1000ms
+    add_task(task1, 700);  // 7ms
+    add_task(task2, 10100); // 101ms
+    add_task(task3, 100010); // 1000ms
 }
 
 ////////////////////////////////////////////////////////////example///////////////////////////////////////////////////////////////////////////////

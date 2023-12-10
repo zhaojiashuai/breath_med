@@ -29,7 +29,6 @@ uint16_t get_crc16(uint8_t *data, uint8_t length)
 {
     u16 MSBInfo, i, j;
     u16 wCrcData = 0xFFFF;
-    u16 crc16;
 
     for (i = 0; i < length; i++)
     {
@@ -264,19 +263,32 @@ void modbus_03_slave(uint16_t *buf) // 01 03 02 00 01 84 0A 主站 功能码 寄存器数
     cmd_03[len] = i;
     cmd_03[len + 1] = j;
     len = len + 2;
+    uart1_printf(cmd_03, len);
     // send
 }
 
 void modbus_06_slave(uint16_t *buf) // 01 06 00 00 00 01 84 0A  原样返回
 {
-    uint16_t num = 0;
+    uint16_t num = 0, len = 0;
+    len = 8;
     num = modbus_dev.rx_buf[2] << 8 | modbus_dev.rx_buf[3];
     buf[num] = modbus_dev.rx_buf[4] << 8 | modbus_dev.rx_buf[5];
+    uart1_printf(modbus_dev.rx_buf, len);
+    // send
 }
 
 void modbus_10_slave(uint16_t *buf) // 01 10 00 00 00 01 69 50 主站 功能码 寄存器的地址 寄存器的数量 校验
 {
+    uint8_t i, j;
+    uint16_t len = 6;
+    calculate_CRC(&modbus_dev.rx_buf[0], len, &i, &j);
+    modbus_dev.rx_buf[len] = i;
+    modbus_dev.rx_buf[len + 1] = j;
+    len = len + 2;
+    uart1_printf(modbus_dev.rx_buf, len);
+    // send
 }
+
 void modbus_slave_parse(uint16_t *buf)
 {
     if (modbus_dev.ok_flag == 1)
@@ -287,10 +299,10 @@ void modbus_slave_parse(uint16_t *buf)
             modbus_03_slave(buf);
             break;
         case 0x06:
-            modbus_06_hook(buf);
+            modbus_06_slave(buf);
             break;
         case 0x10:
-            modbus_10_hook(buf);
+            modbus_10_slave(buf);
             break;
         }
     }
