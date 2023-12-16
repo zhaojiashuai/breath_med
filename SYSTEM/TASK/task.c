@@ -63,7 +63,7 @@ void run_tasks(void)
 extern display_t sensor;
 void task1(void)
 {
-    get_sensor_value();
+    datatrans_deal();
     // printf("Task 1 executed!\n");
 }
 
@@ -71,15 +71,15 @@ void task2(void)
 {
     LED = !LED;
     set_sensor_value();
-    // printf("Task 2 executed!\n");
+    closed_loop_control();
 }
 
 void task3(void)
 {
-    uint8_t buff[] = {"test example\r\n"};
-    uart3_printf(buff, strlen((const char *)buff));
-    uart4_printf(buff, strlen((const char *)buff));
-    uart5_printf(buff, strlen((const char *)buff));
+    // uint8_t buff[] = {"test example\r\n"};
+    // uart3_printf(buff, strlen((const char *)buff));
+    // uart4_printf(buff, strlen((const char *)buff));
+    // uart5_printf(buff, strlen((const char *)buff));
     // printf("Task 3 executed!\n");
 }
 

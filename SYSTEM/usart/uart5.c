@@ -75,7 +75,7 @@ void UART5_IRQHandler(void)//16 09 01 01 F4 00 64 00 D2 00 00 B5
     {
         USART_ClearITPendingBit(UART5, USART_IT_RXNE); // 清除中断标志位
         uart5[cnt++] = USART_ReceiveData(UART5);                // 读取接收到的数据
-        if(uart5[0]!=0x16)
+        if(uart5[0]!=0x16||cnt>90)
         {
             cnt = 0;
         }

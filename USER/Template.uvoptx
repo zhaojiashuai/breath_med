@@ -164,7 +164,7 @@
           <Type>0</Type>
           <LineNumber>214</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134225934</Address>
+          <Address>134226054</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
@@ -180,7 +180,7 @@
         <Ww>
           <count>0</count>
           <WinNumber>1</WinNumber>
-          <ItemText>AdcValues,0x10</ItemText>
+          <ItemText>AdcValues,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>1</count>
@@ -196,6 +196,26 @@
           <count>3</count>
           <WinNumber>1</WinNumber>
           <ItemText>sensor,0x0A</ItemText>
+        </Ww>
+        <Ww>
+          <count>4</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>modbus_dis,0x0A</ItemText>
+        </Ww>
+        <Ww>
+          <count>5</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>uart3</ItemText>
+        </Ww>
+        <Ww>
+          <count>6</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>cnt</ItemText>
+        </Ww>
+        <Ww>
+          <count>7</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>output</ItemText>
         </Ww>
       </WatchWindow1>
       <Tracepoint>

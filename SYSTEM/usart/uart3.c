@@ -68,7 +68,7 @@ void USART3_IRQHandler(void)
     {
         USART_ClearITPendingBit(USART3, USART_IT_RXNE); // 清除中断标志位
         uart3[cnt++] = USART_ReceiveData(USART3);       // 读取接收到的数据
-        if (uart3[0] != 0x16)
+        if (uart3[0] != 0x16||cnt>90)
         {
             cnt = 0;
         }

@@ -47,7 +47,7 @@ void TIM14_PWM_Init(u32 arr, u32 psc)
 计数频率 = 时钟源频率 / (预分频值 + 1)
 定时时间 = 自动重载计数值 / 计数频率
 */
-void TIM2_Configuration(void)//1ms
+void TIM2_Configuration(void) // 1ms
 {
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
 
@@ -57,7 +57,7 @@ void TIM2_Configuration(void)//1ms
     TIM_TimeBaseStructure.TIM_Period = 1000 - 1; // 根据需要调整计数周期
     TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV1;
     TIM_TimeBaseStructure.TIM_RepetitionCounter = 0;
-    
+
     TIM_TimeBaseInit(TIM2, &TIM_TimeBaseStructure);
 
     TIM_ClearITPendingBit(TIM2, TIM_IT_Update);
@@ -73,15 +73,13 @@ void TIM2_Configuration(void)//1ms
     TIM_Cmd(TIM2, ENABLE);
 }
 
+uint32_t g_count = 0;
+
 void TIM2_IRQHandler(void)
 {
     if (TIM_GetITStatus(TIM2, TIM_IT_Update) != RESET)
     {
-        // 在这里编写你想执行的代码
-        // ...
-        
+        g_count++;
         TIM_ClearITPendingBit(TIM2, TIM_IT_Update);
     }
 }
-
-
