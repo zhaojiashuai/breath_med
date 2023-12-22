@@ -264,6 +264,7 @@ void modbus_03_slave(uint16_t *buf) // 01 03 02 00 01 84 0A Ö÷Õ¾ ¹¦ÄÜÂë ¼Ä´æÆ÷Êý
     cmd_03[len + 1] = j;
     len = len + 2;
     uart1_printf(cmd_03, len);
+    uart4_printf(cmd_03, len);
     // send
 }
 
@@ -274,6 +275,7 @@ void modbus_06_slave(uint16_t *buf) // 01 06 00 00 00 01 84 0A  Ô­Ñù·µ»Ø
     num = modbus_dev.rx_buf[2] << 8 | modbus_dev.rx_buf[3];
     buf[num] = modbus_dev.rx_buf[4] << 8 | modbus_dev.rx_buf[5];
     uart1_printf(modbus_dev.rx_buf, len);
+    uart4_printf(modbus_dev.rx_buf, len);
     // send
 }
 
@@ -286,6 +288,7 @@ void modbus_10_slave(uint16_t *buf) // 01 10 00 00 00 01 69 50 Ö÷Õ¾ ¹¦ÄÜÂë ¼Ä´æÆ
     modbus_dev.rx_buf[len + 1] = j;
     len = len + 2;
     uart1_printf(modbus_dev.rx_buf, len);
+    uart4_printf(modbus_dev.rx_buf, len);
     // send
 }
 

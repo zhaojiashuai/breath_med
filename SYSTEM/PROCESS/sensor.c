@@ -66,13 +66,16 @@ void breath_Deal(void)
             g_count = 0;
         }
     }
-    if (sensor.breath_stat == 0) // 7ms没有呼吸的状态
+    if (sensor.breath_stat == 0) // 7ms
     {
-        if (count++ > 500) // 3.5s
+        if (count++ > 500) // 3.5s没有呼吸的状态
         {
             count = 500;
             in_time = 0;
             out_time = 0;
+            sensor.xi_value = 0;
+            sensor.hu_value = 0;
+            sensor.berath_value = 0;
         }
     }
     else
@@ -80,8 +83,19 @@ void breath_Deal(void)
         count = 0;
     }
 
-    sensor.breath_frq = 60000 / (in_time + out_time); // 吸呼比
+    sensor.breath_frq = 60000 / (in_time + out_time); // 呼吸频率
     sensor.breath_rat = in_time * 100 / out_time;     // 吸呼比
+
+    if (sensor.breath_stat == 1) // 吸气量--呼吸流量
+    {
+        sensor.xi_value = output.flow;
+        sensor.berath_value = output.flow;
+    }
+    else if (sensor.breath_stat == -1) // 呼气量--呼吸流量
+    {
+        sensor.hu_value = output.flow;
+        sensor.berath_value = -output.flow;
+    }
 }
 
 void display_trans(void)
@@ -98,11 +112,21 @@ void display_trans(void)
 
     modbus_dis[concentrator_oxygen] = input.oxygen;
     modbus_dis[concentrator_flow] = input.flow;
+    modbus_dis[concentrator_setflow] = input.set_flow;
     modbus_dis[mixed_oxygen] = output.oxygen;
     modbus_dis[mixed_flow] = output.flow;
 
-    modbus_dis[xi_pre] = sensor.qiti_pre;
-    modbus_dis[hu_pre] = sensor.breath_pre;
+    modbus_dis[huxi_freq] = sensor.breath_frq;
+    modbus_dis[huxi_ratio] = sensor.breath_rat;
+
+    modbus_dis[xiqi_value] = sensor.xi_value;
+    modbus_dis[huqi_value] = sensor.hu_value;
+    modbus_dis[huxi_flow] = sensor.berath_value; ////为了解决传输中不能出现负数的问题
+    modbus_dis[chaoqi_value] = sensor.xi_value;
+
+    (sensor.breath_pre > 0) ? (modbus_dis[xi_pre] = sensor.breath_pre) : (modbus_dis[hu_pre] = sensor.breath_pre); // 为了解决传输中不能出现负数的问题
+
+    modbus_dis[breath_pressure] = sensor.qiti_pre;
 
     modbus_dis[p_value_out] = sensor.set_p_value;
     modbus_dis[fan_out] = sensor.set_fan_out;
@@ -113,19 +137,25 @@ void display_trans(void)
     modbus_dis[relay4] = sensor.relay4;
 
     modbus_slave_parse(modbus_dis);
+    // 解析到之后把数据设定到指定结构体之中
+    input.set_flow = modbus_dis[concentrator_setflow];
+    machine.set_fan = modbus_dis[Compressor_setfun];
+    machine.set_switch = modbus_dis[Compressor_setswitch];
+    machine.set_speed = modbus_dis[Compressor_setspeed];
+    sensor.set_p_value = modbus_dis[p_value_out];
+    sensor.set_fan_out = modbus_dis[fan_out];
 
+    sensor.relay1 = modbus_dis[relay1];
+    sensor.relay2 = modbus_dis[relay2];
+    sensor.relay3 = modbus_dis[relay3];
+    sensor.relay4 = modbus_dis[relay4];
     if (modbus_dis[debug_mode])
     {
-        machine.set_fan = modbus_dis[Compressor_setfun];
-        machine.set_speed = modbus_dis[Compressor_setspeed];
-        sensor.set_p_value = modbus_dis[p_value_out];
-        sensor.set_fan_out = modbus_dis[fan_out];
-
-        sensor.relay1 = modbus_dis[relay1];
-        sensor.relay2 = modbus_dis[relay2];
-        sensor.relay3 = modbus_dis[relay3];
-        sensor.relay4 = modbus_dis[relay4];
     }
+    (sensor.relay1 & 0x01) ? (TEST_IO1 = 1) : (TEST_IO1 = 0);
+    (sensor.relay2 & 0x01) ? (TEST_IO2 = 1) : (TEST_IO2 = 0);
+    (sensor.relay3 & 0x01) ? (TEST_IO3 = 1) : (TEST_IO3 = 0);
+    (sensor.relay4 & 0x01) ? (TEST_IO4 = 1) : (TEST_IO4 = 0);
 }
 
 void datatrans_deal(void)
@@ -137,25 +167,25 @@ void datatrans_deal(void)
 
 void set_sensor_value(void)
 {
-    compressor_set(modbus_dis[Compressor_setswitch], machine.set_speed, machine.set_fan); // 压缩机设定
-    TIM_SetCompare1(TIM3, sensor.set_fan_out);                                            // 设定无刷风机
-    TIM_SetCompare2(TIM3, sensor.set_p_value);                                            // 设定比例阀输出
+    compressor_set(machine.set_switch, machine.set_speed, machine.set_fan); // 压缩机设定
+    TIM_SetCompare1(TIM3, sensor.set_fan_out);                              // 设定无刷风机
+    TIM_SetCompare2(TIM3, sensor.set_p_value);                              // 设定比例阀输出
 }
 
 // PID控制器更新函数
 uint16_t PID_cal(PIDController *pid, double setpoint, double input, uint16_t Kp, uint16_t Ki, uint16_t Kd)
 {
     uint16_t out;
-    pid->Kp = Kp / 1000;
-    pid->Ki = Ki / 1000;
-    pid->Kd = Kd / 1000;
+    pid->Kp = Kp / 1000000;
+    pid->Ki = Ki / 1000000;
+    pid->Kd = Kd / 1000000;
     // 计算偏差
     pid->Err_P = setpoint - input;
 
     pid->Err_I = pid->Err_P - pid->LastError;
     pid->Err_D = pid->Err_P - 2 * pid->LastError + pid->L_LastError;
     pid->Output += pid->Kp * pid->Err_P + pid->Ki * pid->Err_I + pid->Kd * pid->Err_D;
-    if (setpoint == 0)
+    if (setpoint == 0 || pid->Output <= 0)
     {
         pid->Output = 0;
         pid->LastError = 0.0;
@@ -185,7 +215,6 @@ void pressure_closed(void)
 }
 void closed_loop_control(void)
 {
-
     if (modbus_dis[debug_mode])
         return;
     Compressor_closed();

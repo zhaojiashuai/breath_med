@@ -13,9 +13,9 @@ int main(void)
 	TIM2_Configuration(); //
 	EXTIX_Init(); 
 	uart_init(9600);
-	uart2_init(115200);
+	uart2_init(9600);
 	uart3_init(9600);
-	uart4_init(115200);
+	uart4_init(9600);
 	uart5_init(9600);	
 	init_task();
 

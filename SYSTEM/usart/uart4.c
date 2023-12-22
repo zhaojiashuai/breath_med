@@ -66,6 +66,6 @@ void UART4_IRQHandler(void)
     {
         USART_ClearITPendingBit(UART4, USART_IT_RXNE); // 清除中断标志位
         res = USART_ReceiveData(UART4);                // 读取接收到的数据
-        USART_SendData(UART4, res);
+        modbus_slave_deal(res);
     }
 }

@@ -37,6 +37,7 @@ typedef struct sensor // 氧气传感器信息
     int16_t oxygen;
     int16_t flow;
     int16_t temp;
+    int16_t set_flow;
 } oxygen_t, *oxygen_ptr;
 
 typedef struct
@@ -72,8 +73,11 @@ typedef struct display
     uint8_t relay3;
     uint8_t relay4;
     int8_t  breath_stat;
+    int16_t breath_pre;     // 呼吸压力  
+    int16_t xi_value;     // 吸气量
+    int16_t hu_value;     // 呼气量
+    int16_t berath_value;     // 呼吸流量
     uint16_t qiti_pre;     // 气体压力
-    int16_t breath_pre;     // 呼吸压力
     uint16_t set_breath_pre; // 设定呼吸压力
     uint16_t set_p_value; // 设定比例阀输出
     uint16_t set_fan_out; // 设定无刷风机输出
@@ -138,15 +142,16 @@ typedef enum
     relay2,//继电器2
     relay3,//继电器3
     relay4,//继电器4
-    Compressor_kp,
-    Compressor_ki,
-    Compressor_kd,
-    mixed_kp,
-    mixed_ki,
-    mixed_kd,
-    pressure_kp,
-    pressure_ki,
-    pressure_kd,
+    Compressor_kp,//制氧机PID参数KP
+    Compressor_ki,//制氧机PID参数KI
+    Compressor_kd,//制氧机PID参数KD
+    mixed_kp,//混氧PID参数
+    mixed_ki,//混氧PID参数
+    mixed_kd,//混氧PID参数
+    pressure_kp,//压力PID参数
+    pressure_ki,//压力PID参数
+    pressure_kd,//压力PID参数
+    breath_pressure,//呼吸压力
 }modbus;
 
 
