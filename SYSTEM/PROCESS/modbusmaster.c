@@ -194,7 +194,7 @@ void modbus_slave_deal(uint8_t data)
     static uint8_t len;
     static uint8_t cnt, rxbuf[256];
     rxbuf[cnt++] = data;
-    if (cnt <= 1)
+        if (cnt <= 1)
         return;
     if (rxbuf[1] == 0x10) // 01 10 00 00 00 01 02 00 01 69 50 主站 功能码 寄存器地址 寄存器数量 字节数 后面的写入数据 校验
     {

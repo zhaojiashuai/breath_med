@@ -100,10 +100,7 @@ void breath_Deal(void)
 
 void display_trans(void)
 {
-    modbus_dis[Compressor_setswitch] = machine.set_switch;
-    modbus_dis[Compressor_setfun] = machine.set_fan;
     modbus_dis[Compressor_speed] = machine.speed;
-    modbus_dis[Compressor_setspeed] = machine.set_speed;
     modbus_dis[Compressor_cur] = machine.current;
     modbus_dis[Compressor_vol] = machine.volatge;
     modbus_dis[Compressor_err] = machine.err_code;
@@ -112,7 +109,6 @@ void display_trans(void)
 
     modbus_dis[concentrator_oxygen] = input.oxygen;
     modbus_dis[concentrator_flow] = input.flow;
-    modbus_dis[concentrator_setflow] = input.set_flow;
     modbus_dis[mixed_oxygen] = output.oxygen;
     modbus_dis[mixed_flow] = output.flow;
 
@@ -127,14 +123,6 @@ void display_trans(void)
     (sensor.breath_pre > 0) ? (modbus_dis[xi_pre] = sensor.breath_pre) : (modbus_dis[hu_pre] = sensor.breath_pre); // 为了解决传输中不能出现负数的问题
 
     modbus_dis[breath_pressure] = sensor.qiti_pre;
-
-    modbus_dis[p_value_out] = sensor.set_p_value;
-    modbus_dis[fan_out] = sensor.set_fan_out;
-
-    modbus_dis[relay1] = sensor.relay1;
-    modbus_dis[relay2] = sensor.relay2;
-    modbus_dis[relay3] = sensor.relay3;
-    modbus_dis[relay4] = sensor.relay4;
 
     modbus_slave_parse(modbus_dis);
     // 解析到之后把数据设定到指定结构体之中
@@ -160,16 +148,16 @@ void display_trans(void)
 
 void datatrans_deal(void)
 {
-    get_sensor_value();
-    breath_Deal();
     display_trans();
+    compressor_set(machine.set_switch, machine.set_speed, machine.set_fan); // 压缩机设定
 }
 
 void set_sensor_value(void)
 {
-    compressor_set(machine.set_switch, machine.set_speed, machine.set_fan); // 压缩机设定
-    TIM_SetCompare1(TIM3, sensor.set_fan_out);                              // 设定无刷风机
-    TIM_SetCompare2(TIM3, sensor.set_p_value);                              // 设定比例阀输出
+    get_sensor_value();
+    breath_Deal();
+    TIM_SetCompare1(TIM3, sensor.set_fan_out); // 设定无刷风机
+    TIM_SetCompare2(TIM3, sensor.set_p_value); // 设定比例阀输出
 }
 
 // PID控制器更新函数

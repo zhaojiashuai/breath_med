@@ -16,4 +16,6 @@
 #define TEST_IO4 PCout(3)
 
 void gpio_init(void); // ≥ı ºªØ
+void pwm_io1_out(void);
+void pwm_io2_out(void);
 #endif
