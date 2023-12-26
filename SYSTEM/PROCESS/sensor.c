@@ -100,12 +100,12 @@ void breath_Deal(void)
 
 void display_trans(void)
 {
-    modbus_dis[Compressor_speed] = machine.speed;
-    modbus_dis[Compressor_cur] = machine.current;
-    modbus_dis[Compressor_vol] = machine.volatge;
-    modbus_dis[Compressor_err] = machine.err_code;
-    modbus_dis[Compressor_ambient] = machine.ambient;
-    modbus_dis[Compressor_gas_temp] = machine.gas_temp;
+    // modbus_dis[Compressor_speed] = machine.speed;
+    // modbus_dis[Compressor_cur] = machine.current;
+    // modbus_dis[Compressor_vol] = machine.volatge;
+    // modbus_dis[Compressor_err] = machine.err_code;
+    // modbus_dis[Compressor_ambient] = machine.ambient;
+    // modbus_dis[Compressor_gas_temp] = machine.gas_temp;
 
     modbus_dis[concentrator_oxygen] = input.oxygen;
     modbus_dis[concentrator_flow] = input.flow;
@@ -126,10 +126,9 @@ void display_trans(void)
 
     modbus_slave_parse(modbus_dis);
     // 解析到之后把数据设定到指定结构体之中
-    input.set_flow = modbus_dis[concentrator_setflow];
-    machine.set_fan = modbus_dis[Compressor_setfun];
-    machine.set_switch = modbus_dis[Compressor_setswitch];
-    machine.set_speed = modbus_dis[Compressor_setspeed];
+    // machine.set_fan = modbus_dis[Compressor_setfun];
+    // machine.set_switch = modbus_dis[Compressor_setswitch];
+    // machine.set_speed = modbus_dis[Compressor_setspeed];
     sensor.set_p_value = modbus_dis[p_value_out];
     sensor.set_fan_out = modbus_dis[fan_out];
 
@@ -148,8 +147,9 @@ void display_trans(void)
 
 void datatrans_deal(void)
 {
+    compressor_set(1000,0x01,0x01,0x00);
+    compressor_read();
     display_trans();
-    compressor_set(machine.set_switch, machine.set_speed, machine.set_fan); // 压缩机设定
 }
 
 void set_sensor_value(void)

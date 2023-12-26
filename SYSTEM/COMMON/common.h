@@ -55,15 +55,12 @@ typedef struct
 
 typedef struct device // 压缩机信息
 {
-    int16_t set_speed;
-    int16_t set_switch;
-    int16_t set_fan;
-    int16_t speed;
-    int16_t current;
-    int16_t volatge;
-    int16_t err_code;
-    int16_t ambient;  // 室温
-    int16_t gas_temp; // 气体温度
+    uint8_t en;
+    uint8_t dir;
+    uint8_t stop;
+    uint16_t err_code;
+    uint16_t set_rpm;
+    uint16_t rpm;
 } compressor_t, *compressor_ptr;
 
 typedef struct display

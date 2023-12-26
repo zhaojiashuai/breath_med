@@ -64,55 +64,64 @@ void USART2_SendString(char *str)
 
 void USART2_IRQHandler(void)
 {
+    uint16_t crc16 = 0;
     static u8 cnt = 0;
     static u8 uart2[100] = {0};
     if (USART_GetITStatus(USART2, USART_IT_RXNE) != RESET) // 接收到数据
     {
         USART_ClearITPendingBit(USART2, USART_IT_RXNE); // 清除中断标志位
         uart2[cnt++] = USART_ReceiveData(USART2);       // 读取接收到的数据
-        if (uart2[0] != 0xAA)
+        if (uart2[0] != 0x01 || cnt > 90)
         {
             cnt = 0;
         }
         else
         {
-            if (cnt >= 15)
+            if (cnt < 2)
+                return;
+            if (uart2[1] == 0x06)
             {
-                if (uart2[cnt - 1] == 0x55)
+                if (cnt >= 20)
                 {
-                    machine.speed = uart2[2] | (uart2[3] >> 8);
-                    machine.current = uart2[4] | (uart2[5] >> 8);
-                    machine.volatge = uart2[6] | (uart2[7] >> 8);
-                    machine.err_code = uart2[9];
-                    machine.ambient = uart2[10];
-                    machine.gas_temp = uart2[11];
+                    crc16 = uart2[18] | (uart2[19] << 8);
+                    if (crc16 == get_crc16(uart2, 18))
+                    {
+                        machine.rpm = (uart2[5] | (uart2[6] << 8));
+                        machine.err_code = 0;
+                        machine.err_code |= (uart2[7] & 0x01) | ((uart2[7 + 1] & 0x01) << 1) | ((uart2[7 + 2] & 0x01) << 2) | ((uart2[7 + 3] & 0x01) << 3) | ((uart2[7 + 4] & 0x01) << 4) | ((uart2[7 + 5] & 0x01) << 5) | ((uart2[7 + 6] & 0x01) << 6) | ((uart2[7 + 7] & 0x01) << 7) | ((uart2[7 + 8] & 0x01) << 8);
+                    }
+                    cnt = 0;
                 }
+            }
+            else
+            {
                 cnt = 0;
             }
         }
     }
 }
 
-uint8_t calculateChecksum(uint8_t *data, int size)
-{
-    uint8_t checksum = 0;
-
-    for (int i = 0; i < size; i++)
-    {
-        checksum += data[i];
-    }
-
-    return ~(checksum) + 1;
-}
-
 /*压缩机发送控制指令*/
-void compressor_set(int16_t dat, int16_t speed,int16_t fan)
+void compressor_set(uint16_t rpm, uint8_t en, uint8_t dir, uint8_t stop)
 {
-    uint8_t send[] = {0xAA, 0x00, 0x01, 0xB8, 0x0B, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x3c, 0x55};
-    send[2] = dat;
-    send[3] = speed;
-    send[4] = speed >> 8;
-    send[7] = fan;
-    send[14] = calculateChecksum(&send[1], 13);
-    uart2_printf(send, 16);
+    uint8_t len = 0, i, j;
+    uint8_t send[] = {0x01, 0x03, 0x09, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x3c, 0x55};
+    len = sizeof(send) / sizeof(send[0]);
+    send[5] = rpm;
+    send[6] = rpm >> 8;
+    send[7] = en;
+    send[8] = dir;
+    send[9] = stop;
+    calculate_CRC(send, (len - 2), &i, &j);
+    send[len - 2] = i;
+    send[len - 1] = j;
+    uart2_printf(send, len);
+}
+/*压缩机发送读取状态指令*/
+void compressor_read(void)
+{
+    uint8_t len = 0;
+    uint8_t send[] = {0x01, 0x06, 0x0f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x86, 0x4d};
+    len = sizeof(send) / sizeof(send[0]);
+    uart2_printf(send, len);
 }
