@@ -30,7 +30,7 @@ void bsp_InitAdcDMA(void)
 
 uint16_t get_adc_value(uint8_t ch)
 {
-    if (ch > 9)
+    if (ch > 4)
     {
         return 0;
     }

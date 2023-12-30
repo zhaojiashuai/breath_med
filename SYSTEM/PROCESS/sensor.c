@@ -11,39 +11,72 @@ void get_sensor_value(void)
     double f = 0;
     f = (double)get_adc_value(0);
     f = f / 4096 * 3.3;
-    if (f >= 0.2 && f <= 2.7)
+    f = f * 16000 - 3200;
+    if (f > 40000)
     {
-        f = f * 16000 - 3200;
-        sensor.qiti_pre = (int16_t)f;
+        f = 40000;
     }
-    else
+    else if (f <= 0)
     {
-        sensor.qiti_pre = 0;
+        f = 0;
     }
+    sensor.breath_pre = (uint16_t)f + 1000 - modbus_dis[breath_offset]; // 增加偏移提高系统稳定性
 
     f = (double)get_adc_value(1);
     f = f / 4096 * 3.3;
-    if (f >= 0.2 && f <= 2.7)
+    f = f * 5.0 / 3.3;
+    f = 1.975442640 * pow(f, 7) - 34.3990880 * pow(f, 6) + 240.94350 * pow(f, 5) - 868.19 * pow(f, 4) + 1715.71913742 * pow(f, 3) - 1855.499169 * pow(f, 2) + 1105.51131 * f - 401.78595;
+    if (f > 150)
     {
-        f = f * 400 - 580;
-        sensor.breath_pre = (int16_t)f;
+        f = 150;
     }
-    else
+    else if (f < -150)
     {
-        sensor.breath_pre = 0;
+        f = -150;
     }
-
-    if (abs(sensor.breath_pre) < 10)
-    {
-        sensor.breath_stat = 0;
-    }
-    else if (sensor.breath_pre > 10)
+    sensor.berath_value = (uint16_t)(f * 10) + 1000 - modbus_dis[huxi_offset]; // 增加偏移提高系统稳定性
+    if (sensor.berath_value > 0)
     {
         sensor.breath_stat = 1;
     }
-    else if (sensor.breath_pre < -10)
+    else if (sensor.berath_value < 0)
     {
         sensor.breath_stat = -1;
+    }
+}
+/*周期获取流量积分*/
+void get_breathcount(void)
+{
+    static int8_t last_stat = 0;
+    if (last_stat != sensor.breath_stat)
+    {
+        sensor.breath_count = 0;
+        last_stat = sensor.breath_stat;
+    }
+    if (sensor.berath_value != 0)
+        sensor.breath_count += sensor.berath_value;
+}
+
+void get_breathvalue(uint32_t time)
+{
+    int32_t value = 0;
+    if (sensor.breath_stat == 1) // 吸气状态计算呼气积分量
+    {
+        value = -sensor.breath_count * time / 1000;
+        modbus_dis[huqivalue_5] = modbus_dis[huqivalue_4];
+        modbus_dis[huqivalue_4] = modbus_dis[huqivalue_3];
+        modbus_dis[huqivalue_3] = modbus_dis[huqivalue_2];
+        modbus_dis[huqivalue_2] = modbus_dis[huqivalue_1];
+        modbus_dis[huqivalue_1] = value;
+    }
+    else if (sensor.breath_stat == -1) // 呼气状态计算吸气积分
+    {
+        value = sensor.breath_count * time / 1000;
+        modbus_dis[xiqivalue_5] = modbus_dis[xiqivalue_4];
+        modbus_dis[xiqivalue_4] = modbus_dis[xiqivalue_3];
+        modbus_dis[xiqivalue_3] = modbus_dis[xiqivalue_2];
+        modbus_dis[xiqivalue_2] = modbus_dis[xiqivalue_1];
+        modbus_dis[xiqivalue_1] = value;
     }
 }
 
@@ -58,11 +91,13 @@ void breath_Deal(void)
         if (sensor.breath_stat == 1)
         {
             out_time = g_count;
+            get_breathvalue(out_time);
             g_count = 0;
         }
         else if (sensor.breath_stat == -1)
         {
             in_time = g_count;
+            get_breathvalue(in_time);
             g_count = 0;
         }
     }
@@ -73,8 +108,6 @@ void breath_Deal(void)
             count = 500;
             in_time = 0;
             out_time = 0;
-            sensor.xi_value = 0;
-            sensor.hu_value = 0;
             sensor.berath_value = 0;
         }
     }
@@ -85,69 +118,29 @@ void breath_Deal(void)
 
     sensor.breath_frq = 60000 / (in_time + out_time); // 呼吸频率
     sensor.breath_rat = in_time * 100 / out_time;     // 吸呼比
-
-    if (sensor.breath_stat == 1) // 吸气量--呼吸流量
-    {
-        sensor.xi_value = output.flow;
-        sensor.berath_value = output.flow;
-    }
-    else if (sensor.breath_stat == -1) // 呼气量--呼吸流量
-    {
-        sensor.hu_value = output.flow;
-        sensor.berath_value = -output.flow;
-    }
 }
 
 void display_trans(void)
 {
-    // modbus_dis[Compressor_speed] = machine.speed;
-    // modbus_dis[Compressor_cur] = machine.current;
-    // modbus_dis[Compressor_vol] = machine.volatge;
-    // modbus_dis[Compressor_err] = machine.err_code;
-    // modbus_dis[Compressor_ambient] = machine.ambient;
-    // modbus_dis[Compressor_gas_temp] = machine.gas_temp;
-
     modbus_dis[concentrator_oxygen] = input.oxygen;
     modbus_dis[concentrator_flow] = input.flow;
     modbus_dis[mixed_oxygen] = output.oxygen;
-    modbus_dis[mixed_flow] = output.flow;
 
     modbus_dis[huxi_freq] = sensor.breath_frq;
     modbus_dis[huxi_ratio] = sensor.breath_rat;
 
-    modbus_dis[xiqi_value] = sensor.xi_value;
-    modbus_dis[huqi_value] = sensor.hu_value;
     modbus_dis[huxi_flow] = sensor.berath_value; ////为了解决传输中不能出现负数的问题
-    modbus_dis[chaoqi_value] = sensor.xi_value;
+    modbus_dis[chaoqi_value] = modbus_dis[xiqivalue_1];
 
-    (sensor.breath_pre > 0) ? (modbus_dis[xi_pre] = sensor.breath_pre) : (modbus_dis[hu_pre] = sensor.breath_pre); // 为了解决传输中不能出现负数的问题
-
-    modbus_dis[breath_pressure] = sensor.qiti_pre;
+    modbus_dis[breath_pressure] = sensor.breath_pre;
 
     modbus_slave_parse(modbus_dis);
     // 解析到之后把数据设定到指定结构体之中
-    // machine.set_fan = modbus_dis[Compressor_setfun];
-    // machine.set_switch = modbus_dis[Compressor_setswitch];
-    // machine.set_speed = modbus_dis[Compressor_setspeed];
-    sensor.set_p_value = modbus_dis[p_value_out];
-    sensor.set_fan_out = modbus_dis[fan_out];
-
-    sensor.relay1 = modbus_dis[relay1];
-    sensor.relay2 = modbus_dis[relay2];
-    sensor.relay3 = modbus_dis[relay3];
-    sensor.relay4 = modbus_dis[relay4];
-    if (modbus_dis[debug_mode])
-    {
-    }
-    (sensor.relay1 & 0x01) ? (TEST_IO1 = 1) : (TEST_IO1 = 0);
-    (sensor.relay2 & 0x01) ? (TEST_IO2 = 1) : (TEST_IO2 = 0);
-    (sensor.relay3 & 0x01) ? (TEST_IO3 = 1) : (TEST_IO3 = 0);
-    (sensor.relay4 & 0x01) ? (TEST_IO4 = 1) : (TEST_IO4 = 0);
 }
 
 void datatrans_deal(void)
 {
-    compressor_set(1000,0x01,0x01,0x00);
+    compressor_set(1000, 0x01, 0x01, 0x00);
     compressor_read();
     display_trans();
 }
@@ -156,8 +149,8 @@ void set_sensor_value(void)
 {
     get_sensor_value();
     breath_Deal();
-    TIM_SetCompare1(TIM3, sensor.set_fan_out); // 设定无刷风机
-    TIM_SetCompare2(TIM3, sensor.set_p_value); // 设定比例阀输出
+    TIM_SetCompare1(TIM3, modbus_dis[fan_out]); // 设定无刷风机
+    TIM_SetCompare2(TIM3, modbus_dis[p_value_out]); // 设定比例阀输出
 }
 
 // PID控制器更新函数
@@ -193,13 +186,13 @@ void Compressor_closed(void)
 void mixed_closed(void)
 {
     PIDController mixed = {0};
-    sensor.set_p_value = PID_cal(&mixed, modbus_dis[mixed_setoxygen], output.oxygen, modbus_dis[mixed_kp], modbus_dis[mixed_ki], modbus_dis[mixed_kd]);
+    modbus_dis[p_value_out] = PID_cal(&mixed, modbus_dis[mixed_setoxygen], output.oxygen, modbus_dis[mixed_kp], modbus_dis[mixed_ki], modbus_dis[mixed_kd]);
 }
 
 void pressure_closed(void)
 {
     PIDController pressure = {0};
-    sensor.set_fan_out = PID_cal(&pressure, modbus_dis[set_pre], sensor.qiti_pre, modbus_dis[mixed_kp], modbus_dis[mixed_ki], modbus_dis[mixed_kd]);
+    modbus_dis[fan_out] = PID_cal(&pressure, modbus_dis[set_pre], sensor.breath_pre, modbus_dis[mixed_kp], modbus_dis[mixed_ki], modbus_dis[mixed_kd]);
 }
 void closed_loop_control(void)
 {
@@ -208,4 +201,10 @@ void closed_loop_control(void)
     Compressor_closed();
     mixed_closed();
     pressure_closed();
+}
+
+void data_init(void)
+{
+    modbus_dis[breath_offset] = 1000;
+    modbus_dis[huxi_offset] = 1000;
 }

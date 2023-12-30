@@ -17,7 +17,8 @@ int main(void)
 	uart2_init(9600);
 	uart3_init(9600);
 	uart4_init(9600);
-	uart5_init(9600);	
+	uart5_init(9600);
+	data_init();//初始化数据显示	
 	while (1)
 	{
 		task_run();

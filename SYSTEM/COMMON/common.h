@@ -65,80 +65,48 @@ typedef struct device // 压缩机信息
 
 typedef struct display
 {
-    uint8_t relay1;
-    uint8_t relay2;
-    uint8_t relay3;
-    uint8_t relay4;
     int8_t  breath_stat;
-    int16_t breath_pre;     // 呼吸压力  
-    int16_t xi_value;     // 吸气量
-    int16_t hu_value;     // 呼气量
     int16_t berath_value;     // 呼吸流量
-    uint16_t qiti_pre;     // 气体压力
-    uint16_t set_breath_pre; // 设定呼吸压力
-    uint16_t set_p_value; // 设定比例阀输出
-    uint16_t set_fan_out; // 设定无刷风机输出
-    uint16_t tidal_val;         // 潮气量
+    uint16_t breath_pre;     // 呼吸压力     
     uint16_t breath_frq;        // 呼吸频率
     uint16_t breath_rat;        // 吸呼比
+    int32_t breath_count;       //呼吸流量积分
 } display_t, *display_ptr;
-
-typedef struct parameters
-{
-    int8_t breath_stat;           // 呼吸状态
-    int8_t last_breath_stat;      // 上次呼吸状态
-    uint16_t breath_in_n_time[5]; // 上5次吸气努力时间
-    uint16_t breath_out_time[5];  // 上5次呼气时间
-    uint16_t breath_in_time[5];   // 上5次吸气时间
-    uint16_t in_count;            // 吸相计数
-    uint16_t out_count;           // 呼相计数
-    uint16_t stat_time;           // 当前状态保持时间
-    uint16_t last_stat_time;      // 上一状态保持时间
-    uint16_t average_time;        // 前五次平均吸气努力时间
-    uint16_t sample_rat;          // 采样率-任务触发频率
-    float breath_flow;            // 呼吸流量
-    float last_breath_flow;       // 呼吸流量
-    float flow_k;                 // 流量导数
-    float breath_in[5];           // 上五次吸气量
-    float breath_out[5];          // 上五次呼气量
-    float breath_in_pre;          // 吸相压力
-    float breath_out_pre;         // 呼相压力
-} parameters_t, *parameters_ptr;
 
 typedef enum 
 {
-    concentrator_oxygen = 0,//制氧机氧气浓度
+    concentrator_oxygen = 0,//制氧机氧气浓度------------压缩机调节使用
     concentrator_flow,//制氧机流量
     concentrator_setflow,//制氧机流量设定
-    Compressor_setswitch,//压缩机开关
-    Compressor_setfun,//压缩机风扇开关
     Compressor_speed,//压缩机速度
     Compressor_setspeed,//压缩机设定速度
-    Compressor_cur,//压缩机电流
-    Compressor_vol,//压缩机电压
-    Compressor_err,//压缩机错误码
-    Compressor_ambient,//压缩机室温
-    Compressor_gas_temp,//压缩机气体温度
-    concentrator_mode,//制氧机模式，闭环-开环
     mixed_oxygen,//混氧浓度
-    mixed_flow,//混氧浓度
-    mixed_setoxygen,//混氧设定浓度
-    xi_pre,//吸相压力
-    hu_pre,//呼相压力
-    set_pre,//设定压力
-    xiqi_value,//吸气量
-    huqi_value,//呼气量
+    mixed_setoxygen,//混氧设定浓度---------比例阀调节使用
+    breath_pressure,//呼吸压力-----------压力传感器采集所得
+    breath_offset,//呼吸压力偏移-----------压力传感器采集所得
+    set_xi_pre,//设定吸相压力
+    set_hu_pre,//设定呼相压力
+    set_pre,//设定跟随压力
+    xiqivalue_1,//吸气量1
+    xiqivalue_2,//吸气量2
+    xiqivalue_3,//吸气量3
+    xiqivalue_4,//吸气量4
+    xiqivalue_5,//吸气量5
+    huqivalue_1,//呼气量1
+    huqivalue_2,//呼气量2
+    huqivalue_3,//呼气量3
+    huqivalue_4,//呼气量4
+    huqivalue_5,//呼气量5
     huxi_flow,//呼吸流量
-    chaoqi_value,//潮气量
+    huxi_offset,//呼吸流量偏移
+    chaoqi_value,//潮气量----------就是吸气量
     huxi_freq,//呼吸频率
     huxi_ratio,//呼吸比
     debug_mode,//调试模式
     p_value_out,//比例阀输出
     fan_out,//风机输出
-    relay1,//继电器1
-    relay2,//继电器2
-    relay3,//继电器3
-    relay4,//继电器4
+    relay_plus,//阀序占空比
+    relay_cycle,//阀序周期
     Compressor_kp,//制氧机PID参数KP
     Compressor_ki,//制氧机PID参数KI
     Compressor_kd,//制氧机PID参数KD
@@ -148,7 +116,6 @@ typedef enum
     pressure_kp,//压力PID参数
     pressure_ki,//压力PID参数
     pressure_kd,//压力PID参数
-    breath_pressure,//呼吸压力
 }modbus;
 
 
