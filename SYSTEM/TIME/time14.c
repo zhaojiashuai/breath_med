@@ -38,6 +38,7 @@ void TIM2_IRQHandler(void)
     {
         g_count++;
         task_tic=1;
+        timing_task();
         TIM_ClearITPendingBit(TIM2, TIM_IT_Update);
     }
 }

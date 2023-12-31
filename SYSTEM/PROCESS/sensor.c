@@ -8,8 +8,10 @@ extern oxygen_t output;
 extern compressor_t machine;
 void get_sensor_value(void)
 {
+    static filter_t breath_pre = {0}, berath_value = {0};
     double f = 0;
     f = (double)get_adc_value(0);
+    f = sliding_average_filter(&breath_pre, f);
     f = f / 4096 * 3.3;
     f = f * 16000 - 3200;
     if (f > 40000)
@@ -23,6 +25,7 @@ void get_sensor_value(void)
     sensor.breath_pre = (uint16_t)f + 1000 - modbus_dis[breath_offset]; // 增加偏移提高系统稳定性
 
     f = (double)get_adc_value(1);
+    f = sliding_average_filter(&berath_value, f);
     f = f / 4096 * 3.3;
     f = f * 5.0 / 3.3;
     f = 1.975442640 * pow(f, 7) - 34.3990880 * pow(f, 6) + 240.94350 * pow(f, 5) - 868.19 * pow(f, 4) + 1715.71913742 * pow(f, 3) - 1855.499169 * pow(f, 2) + 1105.51131 * f - 401.78595;
@@ -35,7 +38,7 @@ void get_sensor_value(void)
         f = -150;
     }
     sensor.berath_value = (uint16_t)(f * 10) + 1000 - modbus_dis[huxi_offset]; // 增加偏移提高系统稳定性
-    if (sensor.berath_value > 0)
+    if (sensor.berath_value > 3)
     {
         sensor.breath_stat = 1;
     }
@@ -44,6 +47,32 @@ void get_sensor_value(void)
         sensor.breath_stat = -1;
     }
 }
+/*阀序控制逻辑*/
+void valve_control(void)
+{
+    static uint16_t count = 0;
+    if (modbus_dis[relay_plus] >= modbus_dis[relay_cycle]) // 设定错误
+    {
+        TEST_IO1 = 0;
+        TEST_IO2 = 0;
+        return;
+    }
+    if (count++ < modbus_dis[relay_plus])
+    {
+        TEST_IO1 = 1;
+        TEST_IO2 = 0;
+    }
+    else
+    {
+        TEST_IO1 = 1;
+        TEST_IO2 = 1;
+    }
+    if (count >= modbus_dis[relay_cycle])
+    {
+        count = 0;
+    }
+}
+
 /*周期获取流量积分*/
 void get_breathcount(void)
 {
@@ -55,6 +84,12 @@ void get_breathcount(void)
     }
     if (sensor.berath_value != 0)
         sensor.breath_count += sensor.berath_value;
+}
+/*定时器的任务累计和处理任务--1ms*/
+void timing_task(void)
+{
+    valve_control();
+    get_breathcount();
 }
 
 void get_breathvalue(uint32_t time)
@@ -124,23 +159,24 @@ void display_trans(void)
 {
     modbus_dis[concentrator_oxygen] = input.oxygen;
     modbus_dis[concentrator_flow] = input.flow;
+    modbus_dis[Compressor_speed] = machine.rpm;
+    modbus_dis[Compressor_err] = machine.err_code;
+
     modbus_dis[mixed_oxygen] = output.oxygen;
 
     modbus_dis[huxi_freq] = sensor.breath_frq;
     modbus_dis[huxi_ratio] = sensor.breath_rat;
 
     modbus_dis[huxi_flow] = sensor.berath_value; ////为了解决传输中不能出现负数的问题
-    modbus_dis[chaoqi_value] = modbus_dis[xiqivalue_1];
-
     modbus_dis[breath_pressure] = sensor.breath_pre;
-
+    modbus_dis[chaoqi_value] = modbus_dis[xiqivalue_1];
     modbus_slave_parse(modbus_dis);
     // 解析到之后把数据设定到指定结构体之中
 }
 
 void datatrans_deal(void)
 {
-    compressor_set(1000, 0x01, 0x01, 0x00);
+    compressor_set(modbus_dis[Compressor_setspeed], 0x01, 0x01, 0x00);
     compressor_read();
     display_trans();
 }
@@ -149,7 +185,7 @@ void set_sensor_value(void)
 {
     get_sensor_value();
     breath_Deal();
-    TIM_SetCompare1(TIM3, modbus_dis[fan_out]); // 设定无刷风机
+    TIM_SetCompare1(TIM3, modbus_dis[fan_out]);     // 设定无刷风机
     TIM_SetCompare2(TIM3, modbus_dis[p_value_out]); // 设定比例阀输出
 }
 
@@ -206,5 +242,7 @@ void closed_loop_control(void)
 void data_init(void)
 {
     modbus_dis[breath_offset] = 1000;
-    modbus_dis[huxi_offset] = 1000;
+    modbus_dis[huxi_offset] = 1072;
+    modbus_dis[relay_plus] = 3200;
+    modbus_dis[relay_cycle] = 3700;
 }

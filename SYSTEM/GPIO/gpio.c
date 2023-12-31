@@ -47,5 +47,5 @@ void pwm_io2_out(void)
     if (count >= 100)
     {
         count = 0;
-    }    
+    }
 }

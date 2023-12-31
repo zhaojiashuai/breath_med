@@ -79,6 +79,7 @@ typedef enum
     concentrator_flow,//制氧机流量
     concentrator_setflow,//制氧机流量设定
     Compressor_speed,//压缩机速度
+    Compressor_err,//压缩机错误码
     Compressor_setspeed,//压缩机设定速度
     mixed_oxygen,//混氧浓度
     mixed_setoxygen,//混氧设定浓度---------比例阀调节使用
