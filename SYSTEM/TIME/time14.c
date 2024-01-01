@@ -9,7 +9,7 @@ void TIM2_Configuration(void) // 1ms
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
 
     TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
-    TIM_TimeBaseStructure.TIM_Prescaler = 168 - 1; // 根据需要调整分频系数
+    TIM_TimeBaseStructure.TIM_Prescaler = 84 - 1; // 根据需要调整分频系数
     TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
     TIM_TimeBaseStructure.TIM_Period = 1000 - 1; // 根据需要调整计数周期
     TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV1;

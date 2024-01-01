@@ -7,4 +7,5 @@ void datatrans_deal(void);
 void closed_loop_control(void);
 void data_init(void);
 void timing_task(void);
+void print_task(void);
 #endif

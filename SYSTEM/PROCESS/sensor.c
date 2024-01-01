@@ -38,7 +38,12 @@ void get_sensor_value(void)
         f = -150;
     }
     sensor.berath_value = (uint16_t)(f * 10) + 1000 - modbus_dis[huxi_offset]; // 增加偏移提高系统稳定性
-    if (sensor.berath_value > 3)
+
+    if (abs(sensor.berath_value) < 5)//减小系统稳定误差
+    {
+        sensor.breath_stat = 0;
+    }
+    else if (sensor.berath_value > 0)
     {
         sensor.breath_stat = 1;
     }
@@ -50,24 +55,38 @@ void get_sensor_value(void)
 /*阀序控制逻辑*/
 void valve_control(void)
 {
+    uint16_t temp = 0;
+    static uint8_t flag = 0, last_flag = 0;
     static uint16_t count = 0;
-    if (modbus_dis[relay_plus] >= modbus_dis[relay_cycle]) // 设定错误
-    {
-        TEST_IO1 = 0;
-        TEST_IO2 = 0;
-        return;
-    }
     if (count++ < modbus_dis[relay_plus])
     {
-        TEST_IO1 = 1;
-        TEST_IO2 = 0;
+        if (flag == 0)
+        {
+            TEST_IO1 = 1;
+            TEST_IO2 = 0;
+        }
+        else
+        {
+            TEST_IO1 = 0;
+            TEST_IO2 = 1;
+        }
+        last_flag = flag;
     }
     else
     {
         TEST_IO1 = 1;
         TEST_IO2 = 1;
+        if (last_flag == 1)
+        {
+            flag = 0;
+        }
+        else
+        {
+            flag = 1;
+        }
     }
-    if (count >= modbus_dis[relay_cycle])
+    temp = modbus_dis[relay_cycle] + modbus_dis[relay_plus];
+    if (count >= temp)
     {
         count = 0;
     }
@@ -82,7 +101,7 @@ void get_breathcount(void)
         sensor.breath_count = 0;
         last_stat = sensor.breath_stat;
     }
-    if (sensor.berath_value != 0)
+    if (sensor.breath_stat != 0)//根据呼吸状态获取呼吸流量累计值
         sensor.breath_count += sensor.berath_value;
 }
 /*定时器的任务累计和处理任务--1ms*/
@@ -228,7 +247,7 @@ void mixed_closed(void)
 void pressure_closed(void)
 {
     PIDController pressure = {0};
-    modbus_dis[fan_out] = PID_cal(&pressure, modbus_dis[set_pre], sensor.breath_pre, modbus_dis[mixed_kp], modbus_dis[mixed_ki], modbus_dis[mixed_kd]);
+    modbus_dis[fan_out] = PID_cal(&pressure, modbus_dis[set_pre], sensor.breath_pre, modbus_dis[pressure_kp], modbus_dis[pressure_ki], modbus_dis[pressure_kd]);
 }
 void closed_loop_control(void)
 {
@@ -244,5 +263,24 @@ void data_init(void)
     modbus_dis[breath_offset] = 1000;
     modbus_dis[huxi_offset] = 1072;
     modbus_dis[relay_plus] = 3200;
-    modbus_dis[relay_cycle] = 3700;
+    modbus_dis[relay_cycle] = 500;
+
+    modbus_dis[Compressor_kp] = 1000;
+    modbus_dis[Compressor_ki] = 1000;
+    modbus_dis[Compressor_kd] = 1000;
+
+    modbus_dis[mixed_kp] = 1000;
+    modbus_dis[mixed_ki] = 1000;
+    modbus_dis[mixed_kd] = 1000;
+
+    modbus_dis[pressure_kp] = 1000;
+    modbus_dis[pressure_ki] = 1000;
+    modbus_dis[pressure_kd] = 1000;
+
+}
+
+void print_task(void)
+{
+    // printf("adc1:%d,adc2:%d\r\n", get_adc_value(0), get_adc_value(1));
+    // printf("breath_pre:%d,berath_value:%d\r\n", sensor.breath_pre, sensor.berath_value);
 }

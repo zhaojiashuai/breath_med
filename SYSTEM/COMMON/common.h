@@ -77,7 +77,6 @@ typedef enum
 {
     concentrator_oxygen = 0,//制氧机氧气浓度------------压缩机调节使用
     concentrator_flow,//制氧机流量
-    concentrator_setflow,//制氧机流量设定
     Compressor_speed,//压缩机速度
     Compressor_err,//压缩机错误码
     Compressor_setspeed,//压缩机设定速度
@@ -106,17 +105,18 @@ typedef enum
     debug_mode,//调试模式
     p_value_out,//比例阀输出
     fan_out,//风机输出
-    relay_plus,//阀序占空比
-    relay_cycle,//阀序周期
-    Compressor_kp,//制氧机PID参数KP
-    Compressor_ki,//制氧机PID参数KI
-    Compressor_kd,//制氧机PID参数KD
+    relay_plus,//阀序1时间
+    relay_cycle,//阀序2时间
+    Compressor_kp,//制氧机PID参数
+    Compressor_ki,//制氧机PID参数
+    Compressor_kd,//制氧机PID参数
     mixed_kp,//混氧PID参数
     mixed_ki,//混氧PID参数
     mixed_kd,//混氧PID参数
     pressure_kp,//压力PID参数
     pressure_ki,//压力PID参数
     pressure_kd,//压力PID参数
+    breath_stat,//呼吸模式
 }modbus;
 
 
