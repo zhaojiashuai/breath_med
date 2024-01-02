@@ -8,6 +8,7 @@ extern oxygen_t output;
 extern compressor_t machine;
 void get_sensor_value(void)
 {
+    static uint16_t i = 0;
     static filter_t breath_pre = {0}, berath_value = {0};
     double f = 0;
     f = (double)get_adc_value(0);
@@ -22,7 +23,9 @@ void get_sensor_value(void)
     {
         f = 0;
     }
-    sensor.breath_pre = (uint16_t)f + 1000 - modbus_dis[breath_offset]; // 增加偏移提高系统稳定性
+    i++;
+    f = 4 - 4 * sin(3.14 * i / 1000);
+    sensor.breath_pre = (uint16_t)(f * 1000) + 1000 - modbus_dis[breath_offset]; // 增加偏移提高系统稳定性
 
     f = (double)get_adc_value(1);
     f = sliding_average_filter(&berath_value, f);
@@ -37,9 +40,10 @@ void get_sensor_value(void)
     {
         f = -150;
     }
-    sensor.berath_value = (uint16_t)(f * 10) + 1000 - modbus_dis[huxi_offset]; // 增加偏移提高系统稳定性
+    f = 4 * cos(3.14 * i / 500);
+    sensor.berath_value = (int16_t)(f * 10) + 1000 - modbus_dis[huxi_offset]; // 增加偏移提高系统稳定性
 
-    if (abs(sensor.berath_value) < 5)//减小系统稳定误差
+    if (abs(sensor.berath_value) < 5) // 减小系统稳定误差
     {
         sensor.breath_stat = 0;
     }
@@ -96,12 +100,12 @@ void valve_control(void)
 void get_breathcount(void)
 {
     static int8_t last_stat = 0;
-    if (last_stat != sensor.breath_stat)
+    if (last_stat != sensor.breath_stat && sensor.breath_stat != 0)
     {
         sensor.breath_count = 0;
         last_stat = sensor.breath_stat;
     }
-    if (sensor.breath_stat != 0)//根据呼吸状态获取呼吸流量累计值
+    if (sensor.breath_stat != 0) // 根据呼吸状态获取呼吸流量累计值
         sensor.breath_count += sensor.berath_value;
 }
 /*定时器的任务累计和处理任务--1ms*/
@@ -116,7 +120,7 @@ void get_breathvalue(uint32_t time)
     int32_t value = 0;
     if (sensor.breath_stat == 1) // 吸气状态计算呼气积分量
     {
-        value = -sensor.breath_count * time / 1000;
+        value = -sensor.breath_count * time / 1000 / 60 / 10; // L/min转化成ml 10是系数
         modbus_dis[huqivalue_5] = modbus_dis[huqivalue_4];
         modbus_dis[huqivalue_4] = modbus_dis[huqivalue_3];
         modbus_dis[huqivalue_3] = modbus_dis[huqivalue_2];
@@ -125,7 +129,7 @@ void get_breathvalue(uint32_t time)
     }
     else if (sensor.breath_stat == -1) // 呼气状态计算吸气积分
     {
-        value = sensor.breath_count * time / 1000;
+        value = sensor.breath_count * time / 1000 / 60 / 10;
         modbus_dis[xiqivalue_5] = modbus_dis[xiqivalue_4];
         modbus_dis[xiqivalue_4] = modbus_dis[xiqivalue_3];
         modbus_dis[xiqivalue_3] = modbus_dis[xiqivalue_2];
@@ -262,6 +266,7 @@ void data_init(void)
 {
     modbus_dis[breath_offset] = 1000;
     modbus_dis[huxi_offset] = 1072;
+    modbus_dis[huxi_offset] = 1000;
     modbus_dis[relay_plus] = 3200;
     modbus_dis[relay_cycle] = 500;
 
@@ -276,7 +281,6 @@ void data_init(void)
     modbus_dis[pressure_kp] = 1000;
     modbus_dis[pressure_ki] = 1000;
     modbus_dis[pressure_kd] = 1000;
-
 }
 
 void print_task(void)
