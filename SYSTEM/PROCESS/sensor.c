@@ -6,6 +6,17 @@ uint16_t modbus_dis[50];
 extern oxygen_t input;
 extern oxygen_t output;
 extern compressor_t machine;
+
+void zhjw_test(void)
+{
+    input.oxygen = rand() % 1000 / 10;
+    input.flow = rand() % 1000 / 10;
+    machine.rpm = rand() % 5000;
+
+    machine.err_code = rand() % 255;
+    output.oxygen = rand() % 1000 / 10;
+}
+
 void get_sensor_value(void)
 {
     static uint16_t i = 0;
@@ -42,7 +53,7 @@ void get_sensor_value(void)
     }
     f = 4 * cos(3.14 * i / 500);
     sensor.berath_value = (int16_t)(f * 10) + 1000 - modbus_dis[huxi_offset]; // 增加偏移提高系统稳定性
-
+    zhjw_test();
     if (abs(sensor.berath_value) < 5) // 减小系统稳定误差
     {
         sensor.breath_stat = 0;
