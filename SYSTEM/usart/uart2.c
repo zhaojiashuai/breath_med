@@ -101,12 +101,27 @@ void USART2_IRQHandler(void)
     }
 }
 
-/*压缩机发送控制指令*/
+/*压缩机发送读取状态指令*/
+static void compressor_read(void)
+{
+    uint8_t len = 0;
+    uint8_t send[] = {0x01, 0x06, 0x0f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x86, 0x4d};
+    len = sizeof(send) / sizeof(send[0]);
+    uart2_printf(send, len);
+}
+
+/*压缩机发送控制指令和读取指令*/
 void compressor_set(uint16_t rpm, uint8_t en, uint8_t dir, uint8_t stop)
 {
+    static uint8_t flag = 0;
     uint8_t len = 0, i, j;
     uint8_t send[] = {0x01, 0x03, 0x09, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x3c, 0x55};
     len = sizeof(send) / sizeof(send[0]);
+    if (flag++ % 2 == 1) // 分开发送一次发送设定一次发送读取指令
+    {
+        compressor_read();
+        return;
+    }
     send[5] = rpm;
     send[6] = rpm >> 8;
     send[7] = en;
@@ -115,13 +130,5 @@ void compressor_set(uint16_t rpm, uint8_t en, uint8_t dir, uint8_t stop)
     calculate_CRC(send, (len - 2), &i, &j);
     send[len - 2] = i;
     send[len - 1] = j;
-    uart2_printf(send, len);
-}
-/*压缩机发送读取状态指令*/
-void compressor_read(void)
-{
-    uint8_t len = 0;
-    uint8_t send[] = {0x01, 0x06, 0x0f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x86, 0x4d};
-    len = sizeof(send) / sizeof(send[0]);
     uart2_printf(send, len);
 }

@@ -53,7 +53,7 @@ void get_sensor_value(void)
     }
     f = 4 * cos(3.14 * i / 500);
     sensor.berath_value = (int16_t)(f * 10) + 1000 - modbus_dis[huxi_offset]; // 增加偏移提高系统稳定性
-    zhjw_test();
+    // zhjw_test();
     if (abs(sensor.berath_value) < 5) // 减小系统稳定误差
     {
         sensor.breath_stat = 0;
@@ -211,7 +211,6 @@ void display_trans(void)
 void datatrans_deal(void)
 {
     compressor_set(modbus_dis[Compressor_setspeed], 0x01, 0x01, 0x00);
-    compressor_read();
     display_trans();
 }
 
@@ -278,8 +277,8 @@ void data_init(void)
     modbus_dis[breath_offset] = 1000;
     modbus_dis[huxi_offset] = 1072;
     modbus_dis[huxi_offset] = 1000;
-    modbus_dis[relay_plus] = 3200;
-    modbus_dis[relay_cycle] = 500;
+    modbus_dis[relay_plus] = 32;
+    modbus_dis[relay_cycle] = 5;
 
     modbus_dis[Compressor_kp] = 1000;
     modbus_dis[Compressor_ki] = 1000;
