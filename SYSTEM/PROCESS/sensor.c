@@ -25,18 +25,18 @@ void get_sensor_value(void)
     f = (double)get_adc_value(0);
     f = sliding_average_filter(&breath_pre, f);
     f = f / 4096 * 3.3;
-    f = f * 16000 - 3200;
-    if (f > 40000)
+    f = f * 2000 - 400;
+    if (f > 5000)
     {
-        f = 40000;
+        f = 5000;
     }
     else if (f <= 0)
     {
         f = 0;
     }
     i++;
-    f = 4 - 4 * sin(3.14 * i / 1000);
-    sensor.breath_pre = (uint16_t)(f * 1000) + 1000 - modbus_dis[breath_offset]; // 增加偏移提高系统稳定性
+    // f = (5 - 5 * sin(3.14 * i / 1000)) * 100;
+    sensor.breath_pre = (uint16_t)(f + 1000 - modbus_dis[breath_offset]); // 增加偏移提高系统稳定性
 
     f = (double)get_adc_value(1);
     f = sliding_average_filter(&berath_value, f);
@@ -51,8 +51,8 @@ void get_sensor_value(void)
     {
         f = -150;
     }
-    f = 4 * cos(3.14 * i / 500);
-    sensor.berath_value = (int16_t)(f * 10) + 1000 - modbus_dis[huxi_offset]; // 增加偏移提高系统稳定性
+    // f = 50 * cos(3.14 * i / 500);
+    sensor.berath_value = (int16_t)(f + 1000 - modbus_dis[huxi_offset]); // 增加偏移提高系统稳定性
     // zhjw_test();
     if (abs(sensor.berath_value) < 5) // 减小系统稳定误差
     {
@@ -256,13 +256,36 @@ void mixed_closed(void)
 {
     PIDController mixed = {0};
     modbus_dis[p_value_out] = PID_cal(&mixed, modbus_dis[mixed_setoxygen], output.oxygen, modbus_dis[mixed_kp], modbus_dis[mixed_ki], modbus_dis[mixed_kd]);
+    if (modbus_dis[p_value_out] > 500)
+    {
+        modbus_dis[p_value_out] = 0;
+    }
 }
 
 void pressure_closed(void)
 {
     PIDController pressure = {0};
-    modbus_dis[fan_out] = PID_cal(&pressure, modbus_dis[set_pre], sensor.breath_pre, modbus_dis[pressure_kp], modbus_dis[pressure_ki], modbus_dis[pressure_kd]);
+    if (modbus_dis[breath_stat] == 1) // 恒压模式
+    {
+        modbus_dis[fan_out] = PID_cal(&pressure, modbus_dis[set_pre], sensor.breath_pre, modbus_dis[pressure_kp], modbus_dis[pressure_ki], modbus_dis[pressure_kd]);
+    }
+    else // 跟随模式
+    {
+        if (sensor.breath_stat == 1)
+        {
+            modbus_dis[fan_out] = PID_cal(&pressure, modbus_dis[set_xi_pre], sensor.breath_pre, modbus_dis[pressure_kp], modbus_dis[pressure_ki], modbus_dis[pressure_kd]);
+        }
+        else
+        {
+            modbus_dis[fan_out] = 0;
+        }
+    }
+    if (modbus_dis[fan_out] > 500)
+    {
+        modbus_dis[fan_out] = 0;
+    }
 }
+
 void closed_loop_control(void)
 {
     if (modbus_dis[debug_mode])
@@ -281,16 +304,16 @@ void data_init(void)
     modbus_dis[relay_cycle] = 5;
 
     modbus_dis[Compressor_kp] = 1000;
-    modbus_dis[Compressor_ki] = 1000;
-    modbus_dis[Compressor_kd] = 1000;
+    modbus_dis[Compressor_ki] = 0;
+    modbus_dis[Compressor_kd] = 0;
 
     modbus_dis[mixed_kp] = 1000;
-    modbus_dis[mixed_ki] = 1000;
-    modbus_dis[mixed_kd] = 1000;
+    modbus_dis[mixed_ki] = 0;
+    modbus_dis[mixed_kd] = 0;
 
     modbus_dis[pressure_kp] = 1000;
-    modbus_dis[pressure_ki] = 1000;
-    modbus_dis[pressure_kd] = 1000;
+    modbus_dis[pressure_ki] = 0;
+    modbus_dis[pressure_kd] = 0;
 }
 
 void print_task(void)
