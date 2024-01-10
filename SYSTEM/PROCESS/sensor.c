@@ -77,20 +77,20 @@ void valve_control(void)
     {
         if (flag == 0)
         {
-            TEST_IO1 = 1;
-            TEST_IO2 = 0;
+            TEST_IO1 = 0;
+            TEST_IO2 = 1;
         }
         else
         {
-            TEST_IO1 = 0;
-            TEST_IO2 = 1;
+            TEST_IO1 = 1;
+            TEST_IO2 = 0;
         }
         last_flag = flag;
     }
     else
     {
-        TEST_IO1 = 1;
-        TEST_IO2 = 1;
+        TEST_IO1 = 0;
+        TEST_IO2 = 0;
         if (last_flag == 1)
         {
             flag = 0;
