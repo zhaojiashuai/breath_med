@@ -226,16 +226,16 @@ void set_sensor_value(void)
 uint16_t PID_cal(PIDController *pid, double setpoint, double input, uint16_t Kp, uint16_t Ki, uint16_t Kd)
 {
     uint16_t out;
-    pid->Kp = Kp / 1000000;
-    pid->Ki = Ki / 1000000;
-    pid->Kd = Kd / 1000000;
+    pid->Kp = (double)Kp / 1000000;
+    pid->Ki = (double)Ki / 1000000;
+    pid->Kd = (double)Kd / 1000000;
     // ¼ÆËãÆ«²î
     pid->Err_P = setpoint - input;
 
     pid->Err_I = pid->Err_P - pid->LastError;
     pid->Err_D = pid->Err_P - 2 * pid->LastError + pid->L_LastError;
     pid->Output += pid->Kp * pid->Err_P + pid->Ki * pid->Err_I + pid->Kd * pid->Err_D;
-    if (setpoint == 0 || pid->Output <= 0)
+    if (setpoint == 0 || pid->Output <= 0 || pid->Err_P < 0)
     {
         pid->Output = 0;
         pid->LastError = 0.0;
@@ -254,17 +254,17 @@ void Compressor_closed(void)
 
 void mixed_closed(void)
 {
-    PIDController mixed = {0};
+    static PIDController mixed = {0};
     modbus_dis[p_value_out] = PID_cal(&mixed, modbus_dis[mixed_setoxygen], output.oxygen, modbus_dis[mixed_kp], modbus_dis[mixed_ki], modbus_dis[mixed_kd]);
     if (modbus_dis[p_value_out] > 500)
     {
-        modbus_dis[p_value_out] = 0;
+        modbus_dis[p_value_out] = 500;
     }
 }
 
 void pressure_closed(void)
 {
-    PIDController pressure = {0};
+    static PIDController pressure = {0};
     if (modbus_dis[breath_stat] == 1) // ºãÑ¹Ä£Ê½
     {
         modbus_dis[fan_out] = PID_cal(&pressure, modbus_dis[set_pre], sensor.breath_pre, modbus_dis[pressure_kp], modbus_dis[pressure_ki], modbus_dis[pressure_kd]);
@@ -282,7 +282,7 @@ void pressure_closed(void)
     }
     if (modbus_dis[fan_out] > 500)
     {
-        modbus_dis[fan_out] = 0;
+        modbus_dis[fan_out] = 500;
     }
 }
 
