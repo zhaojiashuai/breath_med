@@ -67,7 +67,9 @@ typedef struct display
 {
     int8_t  breath_stat;
     int16_t berath_value;     // 呼吸流量
-    uint16_t breath_pre;     // 呼吸压力     
+    int16_t last_berath_value;     // 上一次呼吸流量
+    uint16_t breath_pre;     // 呼吸压力   
+    uint16_t last_breath_pre;     // 上一次呼吸压力    
     uint16_t breath_frq;        // 呼吸频率
     uint16_t breath_rat;        // 吸呼比
     int32_t breath_count;       //呼吸流量积分

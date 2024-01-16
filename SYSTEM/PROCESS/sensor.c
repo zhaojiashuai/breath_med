@@ -22,6 +22,7 @@ void get_sensor_value(void)
     static uint16_t i = 0;
     static filter_t breath_pre = {0}, berath_value = {0};
     double f = 0;
+    sensor.last_breath_pre = sensor.breath_pre;
     f = (double)get_adc_value(0);
     f = sliding_average_filter(&breath_pre, f);
     f = f / 4096 * 3.3;
@@ -38,11 +39,11 @@ void get_sensor_value(void)
     // f = (5 - 5 * sin(3.14 * i / 1000)) * 100;
     sensor.breath_pre = (uint16_t)(f + 1000 - modbus_dis[breath_offset]); // 增加偏移提高系统稳定性
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////
+    sensor.last_berath_value = sensor.berath_value;
     f = (double)get_adc_value(1);
     f = sliding_average_filter(&berath_value, f);
-    f = f / 4096 * 3.3;
-    f = f * 5.0 / 3.3;
-    f = 1.975442640 * pow(f, 7) - 34.3990880 * pow(f, 6) + 240.94350 * pow(f, 5) - 868.19 * pow(f, 4) + 1715.71913742 * pow(f, 3) - 1855.499169 * pow(f, 2) + 1105.51131 * f - 401.78595;
+
     if (f > 150)
     {
         f = 150;
@@ -54,7 +55,7 @@ void get_sensor_value(void)
     // f = 50 * cos(3.14 * i / 500);
     sensor.berath_value = (int16_t)(f + 1000 - modbus_dis[huxi_offset]); // 增加偏移提高系统稳定性
     // zhjw_test();
-    if (abs(sensor.berath_value) < 5) // 减小系统稳定误差
+    if (abs(sensor.berath_value) < 3) // 减小系统稳定误差
     {
         sensor.breath_stat = 0;
     }
@@ -265,13 +266,13 @@ void mixed_closed(void)
 void pressure_closed(void)
 {
     static PIDController pressure = {0};
-    if (modbus_dis[breath_stat] == 1) // 恒压模式
+    if (modbus_dis[breath_stat] == 1) // 恒压模式---射钉固定输出
     {
-        modbus_dis[fan_out] = PID_cal(&pressure, modbus_dis[set_pre], sensor.breath_pre, modbus_dis[pressure_kp], modbus_dis[pressure_ki], modbus_dis[pressure_kd]);
+        modbus_dis[fan_out] = modbus_dis[set_pre];
     }
     else // 跟随模式
     {
-        if (sensor.breath_stat == 1)
+        if (sensor.breath_stat == 1 && (sensor.berath_value - sensor.last_berath_value > 0))//吸气的时候并且吸气加速度为正的时候风机工作
         {
             modbus_dis[fan_out] = PID_cal(&pressure, modbus_dis[set_xi_pre], sensor.breath_pre, modbus_dis[pressure_kp], modbus_dis[pressure_ki], modbus_dis[pressure_kd]);
         }
@@ -280,6 +281,7 @@ void pressure_closed(void)
             modbus_dis[fan_out] = 0;
         }
     }
+
     if (modbus_dis[fan_out] > 500)
     {
         modbus_dis[fan_out] = 500;
