@@ -13,7 +13,6 @@ void task_run(void)
     if (task_time % 5 == 0) // 5ms
     {
         set_sensor_value();
-        closed_loop_control();
     }
     if (task_time % 10 == 0) // 10ms
     {
@@ -24,6 +23,7 @@ void task_run(void)
     if (task_time % 100 == 0) // 100ms
     {
         datatrans_deal();
+        closed_loop_control();        
     }
     if (task_time % 500 == 0) // 500ms
     {

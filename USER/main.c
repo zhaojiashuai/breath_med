@@ -5,6 +5,7 @@ RCC_ClocksTypeDef clk = {0};
 int main(void)
 {
 	delay_init(168);
+	delay_ms(2000);//等待系统上电的延迟，等待屏幕上电后的通讯
 	RCC_GetClocksFreq(&clk);
 	gpio_init();
 	bsp_InitAdcDMA();
