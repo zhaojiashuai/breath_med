@@ -44,14 +44,14 @@ void get_sensor_value(void)
     f = (double)get_adc_value(1);
     f = sliding_average_filter(&berath_value, f);
 
-    if (f > 150)
-    {
-        f = 150;
-    }
-    else if (f < -150)
-    {
-        f = -150;
-    }
+    // if (f > 150)
+    // {
+    //     f = 150;
+    // }
+    // else if (f < -150)
+    // {
+    //     f = -150;
+    // }
     // f = 50 * cos(3.14 * i / 500);
     sensor.berath_value = (int16_t)(f + 1000 - modbus_dis[huxi_offset]); // 增加偏移提高系统稳定性
     // zhjw_test();
