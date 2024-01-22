@@ -73,6 +73,10 @@ typedef struct display
     uint16_t breath_frq;        // 呼吸频率
     uint16_t breath_rat;        // 吸呼比
     int32_t breath_count;       //呼吸流量积分
+    float k_pre;//斜率
+    float b_pre;//偏移
+    float k_valu;//斜率
+    float b_valu;//偏移    
 } display_t, *display_ptr;
 
 typedef enum 
@@ -119,6 +123,15 @@ typedef enum
     pressure_ki,//压力PID参数
     pressure_kd,//压力PID参数
     breath_stat,//呼吸模式
+    cal_stat,//采集的状态
+    pre_x1,//压力标定X1值
+    pre_y1,//压力标定Y1值
+    pre_x2,//压力标定X2值
+    pre_y2,//压力标定Y1值
+    flow_x1,//流量标定X1值
+    flow_y1,//流量标定Y1值
+    flow_x2,//流量标定X2值
+    flow_y2,//流量标定Y2值    
 }modbus;
 
 

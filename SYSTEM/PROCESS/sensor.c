@@ -1,7 +1,7 @@
 #include "sensor.h"
 
 display_t sensor = {0};
-uint16_t modbus_dis[50];
+uint16_t modbus_dis[128];
 
 extern oxygen_t input;
 extern oxygen_t output;
@@ -16,17 +16,42 @@ void zhjw_test(void)
     machine.err_code = rand() % 255;
     output.oxygen = rand() % 1000 / 10;
 }
+/*数据自动标定*/
+void liner_cal(void)
+{
+    float f, f1;
+    if (modbus_dis[cal_stat] == 0)
+    {
+        sensor.k_pre = 1;
+        sensor.k_valu = 1;
+        sensor.b_pre = 0;
+        sensor.b_valu = 0;
+    }
+    else
+    {
+        f = (float)(modbus_dis[pre_y2] - modbus_dis[pre_y1]);
+        f1 = (float)(modbus_dis[pre_x2] - modbus_dis[pre_x1]);
+        sensor.k_pre = f / f1;
+        f = (float)modbus_dis[pre_y1];
+        sensor.b_pre = f - sensor.k_pre * modbus_dis[pre_x1];
+
+        f = (float)(modbus_dis[flow_y2] - modbus_dis[flow_y1]);
+        f1 = (float)(modbus_dis[flow_x2] - modbus_dis[flow_x1]);
+        sensor.k_valu = f / f1;
+        f = (float)modbus_dis[flow_y1];
+        sensor.b_valu = f - sensor.k_valu * modbus_dis[flow_x1];
+    }
+}
 
 void get_sensor_value(void)
 {
-    static uint16_t i = 0;
     static filter_t breath_pre = {0}, berath_value = {0};
     double f = 0;
+    liner_cal();
     sensor.last_breath_pre = sensor.breath_pre;
     f = (double)get_adc_value(0);
     f = sliding_average_filter(&breath_pre, f);
-    f = f / 4096 * 3.3;
-    f = f * 2000 - 400;
+    f = f * sensor.k_pre + sensor.b_pre;
     if (f > 5000)
     {
         f = 5000;
@@ -35,24 +60,13 @@ void get_sensor_value(void)
     {
         f = 0;
     }
-    i++;
-    // f = (5 - 5 * sin(3.14 * i / 1000)) * 100;
     sensor.breath_pre = (uint16_t)(f + 1000 - modbus_dis[breath_offset]); // 增加偏移提高系统稳定性
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////
     sensor.last_berath_value = sensor.berath_value;
     f = (double)get_adc_value(1);
     f = sliding_average_filter(&berath_value, f);
-
-    // if (f > 150)
-    // {
-    //     f = 150;
-    // }
-    // else if (f < -150)
-    // {
-    //     f = -150;
-    // }
-    // f = 50 * cos(3.14 * i / 500);
+    f = f * sensor.k_valu + sensor.b_valu;
     sensor.berath_value = (int16_t)(f + 1000 - modbus_dis[huxi_offset]); // 增加偏移提高系统稳定性
     // zhjw_test();
     if (abs(sensor.berath_value) < 3) // 减小系统稳定误差
@@ -272,7 +286,7 @@ void pressure_closed(void)
     }
     else // 跟随模式
     {
-        if (sensor.breath_stat == 1 && (sensor.berath_value - sensor.last_berath_value > 0))//吸气的时候并且吸气加速度为正的时候风机工作
+        if (sensor.breath_stat == 1 && (sensor.berath_value - sensor.last_berath_value > 0)) // 吸气的时候并且吸气加速度为正的时候风机工作
         {
             modbus_dis[fan_out] = PID_cal(&pressure, modbus_dis[set_xi_pre], sensor.breath_pre, modbus_dis[pressure_kp], modbus_dis[pressure_ki], modbus_dis[pressure_kd]);
         }
