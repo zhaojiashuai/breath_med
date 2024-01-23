@@ -17,6 +17,7 @@
 #include "time3.h"
 #include "time14.h"
 #include "sensor.h"
+#include "flash.h"
 #include "modbusmaster.h"
 #include <stdio.h>
 #include <stdlib.h>

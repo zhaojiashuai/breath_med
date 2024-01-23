@@ -338,7 +338,7 @@
               <MiscControls></MiscControls>
               <Define>STM32F40_41xxx,USE_STDPERIPH_DRIVER</Define>
               <Undefine></Undefine>
-              <IncludePath>..\CORE;..\SYSTEM\delay;..\SYSTEM\sys;..\SYSTEM\usart;..\USER;..\FWLIB\inc;..\SYSTEM\ADC;..\SYSTEM\COMMON;..\SYSTEM\DMA;..\SYSTEM\GPIO;..\SYSTEM\TASK;..\SYSTEM\TIME;..\SYSTEM\usart;..\SYSTEM\EXIT;..\SYSTEM\PROCESS</IncludePath>
+              <IncludePath>..\CORE;..\SYSTEM\delay;..\SYSTEM\sys;..\SYSTEM\usart;..\USER;..\FWLIB\inc;..\SYSTEM\ADC;..\SYSTEM\COMMON;..\SYSTEM\DMA;..\SYSTEM\GPIO;..\SYSTEM\TASK;..\SYSTEM\TIME;..\SYSTEM\usart;..\SYSTEM\EXIT;..\SYSTEM\PROCESS;..\SYSTEM\FLASH</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -666,6 +666,11 @@
               <FileName>EXIT.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\SYSTEM\EXIT\EXIT.c</FilePath>
+            </File>
+            <File>
+              <FileName>flash.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\SYSTEM\FLASH\flash.c</FilePath>
             </File>
           </Files>
         </Group>
