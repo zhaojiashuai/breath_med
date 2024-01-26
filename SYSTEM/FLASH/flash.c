@@ -4,14 +4,14 @@
 // 读取指定地址的半字(16位数据)
 // faddr:读地址
 // 返回值:对应数据.
-u32 STMFLASH_ReadWord(u32 faddr)
+static u32 STMFLASH_ReadWord(u32 faddr)
 {
     return *(vu32 *)faddr;
 }
 // 获取某个地址所在的flash扇区
 // addr:flash地址
 // 返回值:0~11,即addr所在的扇区
-uint16_t STMFLASH_GetFlashSector(u32 addr)
+static uint16_t STMFLASH_GetFlashSector(u32 addr)
 {
     if (addr < ADDR_FLASH_SECTOR_1)
         return FLASH_Sector_0;
@@ -47,7 +47,7 @@ uint16_t STMFLASH_GetFlashSector(u32 addr)
 // WriteAddr:起始地址(此地址必须为4的倍数!!)
 // pBuffer:数据指针
 // NumToWrite:字(32位)数(就是要写入的32位数据的个数.)
-void STMFLASH_Write(u32 WriteAddr, u32 *pBuffer, u32 NumToWrite)
+static void STMFLASH_Write(u32 WriteAddr, u32 *pBuffer, u32 NumToWrite)
 {
     FLASH_Status status = FLASH_COMPLETE;
     u32 addrx = 0;
@@ -93,7 +93,7 @@ void STMFLASH_Write(u32 WriteAddr, u32 *pBuffer, u32 NumToWrite)
 // ReadAddr:起始地址
 // pBuffer:数据指针
 // NumToRead:字(4位)数
-void STMFLASH_Read(u32 ReadAddr, u32 *pBuffer, u32 NumToRead)
+static void STMFLASH_Read(u32 ReadAddr, u32 *pBuffer, u32 NumToRead)
 {
     u32 i;
     for (i = 0; i < NumToRead; i++)
@@ -104,3 +104,28 @@ void STMFLASH_Read(u32 ReadAddr, u32 *pBuffer, u32 NumToRead)
 }
 // STMFLASH_Write(FLASH_SAVE_ADDR,(u32*)TEXT_Buffer,SIZE);
 // STMFLASH_Read(FLASH_SAVE_ADDR,(u32*)datatemp,SIZE);
+
+void fmc_write(uint16_t num, uint16_t data)
+{
+    uint32_t addr = 0, read_data = 0, temp[1] = {0};
+    if (num < pre_x1) // 设定地址不在需要存入flash的区域不会存储
+        return;
+    addr = (num - pre_x1) * 4 + FLASH_SAVE_ADDR;
+    STMFLASH_Read(addr, temp, 1);
+    read_data = temp[0];
+    if (data != (uint16_t)read_data)
+    {
+        temp[0] = (uint32_t)data;
+        STMFLASH_Write(addr, temp, 1);
+    }
+}
+
+uint16_t fmc_read(uint16_t num)
+{
+    uint32_t addr = 0, read_data = 0, temp[1] = {0};
+
+    addr = (num - pre_x1) * 4 + FLASH_SAVE_ADDR;
+    STMFLASH_Read(addr, temp, 1);
+    read_data = temp[0];
+    return (uint16_t)read_data;
+}

@@ -125,7 +125,7 @@ typedef enum
     pressure_kd,//压力PID参数
     breath_stat,//呼吸模式
     cal_stat,//采集的状态
-    pre_x1,//压力标定X1值
+    pre_x1,//压力标定X1值--存储状态开始值
     pre_y1,//压力标定Y1值
     pre_x2,//压力标定X2值
     pre_y2,//压力标定Y1值
