@@ -274,7 +274,7 @@ void modbus_06_slave(uint16_t *buf) // 01 06 00 00 00 01 84 0A  Ô­Ñù·µ»Ø
     len = 8;
     num = modbus_dev.rx_buf[2] << 8 | modbus_dev.rx_buf[3];
     buf[num] = modbus_dev.rx_buf[4] << 8 | modbus_dev.rx_buf[5];
-    fmc_write(num,buf[num]);
+    fmc_write(num,buf);
     uart1_printf(modbus_dev.rx_buf, len);
     uart4_printf(modbus_dev.rx_buf, len);
     // send

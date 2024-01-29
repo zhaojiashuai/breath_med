@@ -122,8 +122,8 @@ void compressor_set(uint16_t rpm, uint8_t en, uint8_t dir, uint8_t stop)
         compressor_read();
         return;
     }
-    send[5] = rpm;
-    send[6] = rpm >> 8;
+    send[3] = rpm;
+    send[4] = rpm >> 8;
     send[7] = en;
     send[8] = dir;
     send[9] = stop;

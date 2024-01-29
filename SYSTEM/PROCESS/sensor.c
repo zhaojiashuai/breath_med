@@ -132,7 +132,7 @@ void get_breathcount(void)
         last_stat = sensor.breath_stat;
     }
     if (sensor.breath_stat != 0) // 根据呼吸状态获取呼吸流量累计值
-        sensor.breath_count += sensor.berath_value;
+        sensor.breath_count += sensor.berath_value / 1000;
 }
 /*定时器的任务累计和处理任务--1ms*/
 void timing_task(void)
@@ -146,7 +146,7 @@ void get_breathvalue(uint32_t time)
     int32_t value = 0;
     if (sensor.breath_stat == 1) // 吸气状态计算呼气积分量
     {
-        value = -sensor.breath_count * time / 1000 / 60 / 10; // L/min转化成ml 10是系数
+        value = -sensor.breath_count * time / 1000 / 60; // L/min转化成ml 10是系数
         modbus_dis[huqivalue_5] = modbus_dis[huqivalue_4];
         modbus_dis[huqivalue_4] = modbus_dis[huqivalue_3];
         modbus_dis[huqivalue_3] = modbus_dis[huqivalue_2];
@@ -155,7 +155,7 @@ void get_breathvalue(uint32_t time)
     }
     else if (sensor.breath_stat == -1) // 呼气状态计算吸气积分
     {
-        value = sensor.breath_count * time / 1000 / 60 / 10;
+        value = sensor.breath_count * time / 1000 / 60;
         modbus_dis[xiqivalue_5] = modbus_dis[xiqivalue_4];
         modbus_dis[xiqivalue_4] = modbus_dis[xiqivalue_3];
         modbus_dis[xiqivalue_3] = modbus_dis[xiqivalue_2];
@@ -225,7 +225,7 @@ void display_trans(void)
 
 void datatrans_deal(void)
 {
-    compressor_set(modbus_dis[Compressor_setspeed], 0x01, 0x01, 0x00);
+    compressor_set(modbus_dis[Compressor_setspeed], 0x00, 0x00, 0x00);
     display_trans();
 }
 
@@ -316,8 +316,8 @@ void data_init(void)
     modbus_dis[breath_offset] = 1000;
     modbus_dis[huxi_offset] = 1072;
     modbus_dis[huxi_offset] = 1000;
-    modbus_dis[relay_plus] = 32;
-    modbus_dis[relay_cycle] = 5;
+    modbus_dis[relay_plus] = 3200;
+    modbus_dis[relay_cycle] = 500;
 
     modbus_dis[Compressor_kp] = 1000;
     modbus_dis[Compressor_ki] = 0;

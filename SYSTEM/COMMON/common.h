@@ -132,7 +132,8 @@ typedef enum
     flow_x1,//流量标定X1值
     flow_y1,//流量标定Y1值
     flow_x2,//流量标定X2值
-    flow_y2,//流量标定Y2值    
+    flow_y2,//流量标定Y2值 
+    all_num,   
 }modbus;
 
 
