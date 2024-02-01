@@ -52,6 +52,7 @@ static void STMFLASH_Write(u32 WriteAddr, u32 *pBuffer, u32 NumToWrite)
     FLASH_Status status = FLASH_COMPLETE;
     u32 addrx = 0;
     u32 endaddr = 0;
+
     if (WriteAddr < STM32_FLASH_BASE || WriteAddr % 4)
         return;                  // 非法地址
     FLASH_Unlock();              // 解锁
@@ -65,6 +66,7 @@ static void STMFLASH_Write(u32 WriteAddr, u32 *pBuffer, u32 NumToWrite)
         {
             if (STMFLASH_ReadWord(addrx) != 0XFFFFFFFF) // 有非0XFFFFFFFF的地方,要擦除这个扇区
             {
+                FLASH_ClearFlag(FLASH_FLAG_EOP|FLASH_FLAG_OPERR|FLASH_FLAG_WRPERR|FLASH_FLAG_PGAERR|FLASH_FLAG_PGPERR|FLASH_FLAG_PGSERR|FLASH_FLAG_RDERR);//自己加上的文件
                 status = FLASH_EraseSector(STMFLASH_GetFlashSector(addrx), VoltageRange_3); // VCC=2.7~3.6V之间!!
                 if (status != FLASH_COMPLETE)
                     break; // 发生错误了
@@ -107,17 +109,22 @@ static void STMFLASH_Read(u32 ReadAddr, u32 *pBuffer, u32 NumToRead)
 
 void fmc_write(uint16_t num, uint16_t *data)
 {
-    uint32_t addr = 0, read_data = 0, temp[255] = {0};
+    uint16_t temp[255] = {0}, read_data = 0;
+    uint32_t addr = 0;
     if (num < pre_x1) // 设定地址不在需要存入flash的区域不会存储
         return;
-    addr = (num - pre_x1) * 4 + FLASH_SAVE_ADDR;
-    STMFLASH_Read(addr, temp, 1);
-    read_data = temp[0];
-    if (data[num] != (uint16_t)read_data)
-    {
-        memcpy(temp,data+pre_x1,(all_num-pre_x1));
-        STMFLASH_Write(addr, temp, (all_num-pre_x1));
-    }
+    // addr = (num - pre_x1) * 4 + FLASH_SAVE_ADDR;
+    // STMFLASH_Read(addr, (uint32_t *)temp, 1);
+    // read_data = (uint16_t)temp[0];
+    // if (data[num] != (uint16_t)read_data)
+    // {
+    //     memcpy(temp,data+pre_x1,8);
+    //     STMFLASH_Write(addr, (uint32_t *)temp, 8);
+    // }
+
+    memcpy(temp,data+pre_x1,8);
+    temp[num-pre_x1] = data[num];
+    STMFLASH_Write(FLASH_SAVE_ADDR, (uint32_t *)temp, 8);
 }
 
 uint16_t fmc_read(uint16_t num)
@@ -128,4 +135,19 @@ uint16_t fmc_read(uint16_t num)
     STMFLASH_Read(addr, temp, 1);
     read_data = temp[0];
     return (uint16_t)read_data;
+}
+
+void test_flash(void)
+{
+    uint32_t i = 0;
+    static uint32_t write[256] = {0};
+    static uint32_t read[256];
+    for (i = 0; i < 255; i++)
+    {
+        write[i] = i;
+    }
+    STMFLASH_Write(FLASH_SAVE_ADDR, write, 255);
+    delay_ms(1000);
+    STMFLASH_Read(FLASH_SAVE_ADDR, read, 255);
+    delay_ms(1000);
 }

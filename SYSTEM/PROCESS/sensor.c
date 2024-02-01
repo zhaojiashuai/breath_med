@@ -342,6 +342,15 @@ void data_init(void)
     modbus_dis[flow_y2] = fmc_read(flow_y2);
 }
 
+void write_flash(void)
+{
+    if (modbus_dev.write_flag)
+    {
+        fmc_write(modbus_dev.write_flag, modbus_dis);
+        modbus_dev.write_flag = 0;
+    }
+}
+
 void print_task(void)
 {
     // printf("adc1:%d,adc2:%d\r\n", get_adc_value(0), get_adc_value(1));

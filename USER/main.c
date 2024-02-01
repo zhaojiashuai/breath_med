@@ -4,6 +4,7 @@
 RCC_ClocksTypeDef clk = {0};
 int main(void)
 {
+	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);//设置系统中断优先级分组2
 	delay_init(168);
 	delay_ms(2000);//等待系统上电的延迟，等待屏幕上电后的通讯
 	RCC_GetClocksFreq(&clk);
@@ -23,5 +24,6 @@ int main(void)
 	while (1)
 	{
 		task_run();
+		test_flash();
 	}
 }

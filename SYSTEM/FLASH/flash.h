@@ -25,7 +25,7 @@
 
 void fmc_write(uint16_t num, uint16_t *data);
 uint16_t fmc_read(uint16_t num);
-
+void test_flash(void);
 #endif
 
 

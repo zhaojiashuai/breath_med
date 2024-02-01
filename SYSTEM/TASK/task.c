@@ -16,6 +16,7 @@ void task_run(void)
     }
     if (task_time % 10 == 0) // 10ms
     {
+
     }
     if (task_time % 20 == 0) // 20ms
     {
@@ -27,6 +28,7 @@ void task_run(void)
     }
     if (task_time % 500 == 0) // 500ms
     {
+        write_flash();        
         LED = !LED;
         print_task();
     }
