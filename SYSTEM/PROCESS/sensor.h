@@ -2,6 +2,8 @@
 #define __SENSOR_H
 #include "common.h"
 
+extern uint16_t modbus_dis[128];
+
 void set_sensor_value(void);
 void datatrans_deal(void);
 void closed_loop_control(void);

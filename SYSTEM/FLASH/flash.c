@@ -109,18 +109,24 @@ static void STMFLASH_Read(u32 ReadAddr, u32 *pBuffer, u32 NumToRead)
 
 void fmc_write(uint16_t num, uint16_t *data)
 {
-    uint16_t temp[255] = {0};
+    uint16_t write_temp[50] = {0};
     if (num < pre_x1) // 设定地址不在需要存入flash的区域不会存储
         return;
-    memcpy(temp,data+pre_x1,(all_num-pre_x1));
-    STMFLASH_Write(FLASH_SAVE_ADDR, (uint32_t *)temp, (all_num-pre_x1));
+    for (uint8_t i = 0; i < (all_num - pre_x1); i++)
+    {
+        write_temp[i] = data[pre_x1 + i];
+    }
+    STMFLASH_Write(FLASH_SAVE_ADDR, (uint32_t *)write_temp, (all_num - pre_x1));
 }
 
 void fmc_read(uint16_t num, uint16_t *data)
 {
-    uint32_t temp[255] = {0};
-        if (num < pre_x1) // 设定地址不在需要存入flash的区域不会存储
+    uint16_t read_temp[50] = {0};
+    if (num < pre_x1) // 设定地址不在需要存入flash的区域不会存储
         return;
-    STMFLASH_Read(FLASH_SAVE_ADDR, temp, (all_num-pre_x1));
-    memcpy(data+pre_x1,(uint16_t *)temp,(all_num-pre_x1));
+    STMFLASH_Read(FLASH_SAVE_ADDR, (uint32_t *)read_temp, (all_num - pre_x1));
+    for (uint8_t i = 0; i < (all_num - pre_x1); i++)
+    {
+        data[pre_x1 + i] = read_temp[i];
+    }
 }

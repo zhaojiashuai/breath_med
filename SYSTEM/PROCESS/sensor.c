@@ -330,8 +330,8 @@ void data_init(void)
     modbus_dis[pressure_kp] = 1000;
     modbus_dis[pressure_ki] = 0;
     modbus_dis[pressure_kd] = 0;
-    
-    fmc_read(pre_x1,modbus_dis);
+
+    fmc_read(pre_x1, modbus_dis);
 }
 
 void write_flash(void)
@@ -341,7 +341,6 @@ void write_flash(void)
         fmc_write(modbus_dev.write_flag, modbus_dis);
         modbus_dev.write_flag = 0;
     }
-    fmc_read(pre_x1,modbus_dis);
 }
 
 void print_task(void)
