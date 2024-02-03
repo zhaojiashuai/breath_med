@@ -187,61 +187,66 @@ void modbus_read(uint8_t mainaddr, uint8_t cmd, uint16_t add, uint16_t data, uin
     }
 }
 
-void modbus_slave_deal(uint8_t data)
+void modbus_slave_deal(uint8_t data, uint8_t addr)
 {
     uint8_t i;
     uint16_t crc16;
     static uint8_t len;
     static uint8_t cnt, rxbuf[256];
     rxbuf[cnt++] = data;
-        if (cnt <= 1)
-        return;
-    if (rxbuf[1] == 0x10) // 01 10 00 00 00 01 02 00 01 69 50 主站 功能码 寄存器地址 寄存器数量 字节数 后面的写入数据 校验
+    if (rxbuf[0] != addr || cnt >= 250)
     {
-        if (cnt > 2)
-        {
-            len = (rxbuf[6] + 8);
-            if (cnt > len)
-            {
-                crc16 = rxbuf[cnt - 2] | (rxbuf[cnt - 1] << 8);
-                if (crc16 == get_crc16(rxbuf, cnt - 2))
-                {
-                    modbus_dev.rx_count = cnt;
-                    for (i = 0; i < cnt; i++)
-                    {
-                        modbus_dev.rx_buf[i] = rxbuf[i];
-                    }
-                    modbus_dev.ok_flag = 1;
-                }
-                cnt = 0;
-            }
-        }
-    }
-    else if (rxbuf[1] == 0x03 || rxbuf[1] == 0x06) // 01 03 00 00 00 01 84 0A 主站 功能码 寄存器地址 寄存器数量/写入的数值 校验
-    {
-        len = 7;
-        if (cnt > len)
-        {
-            crc16 = rxbuf[cnt - 2] | (rxbuf[cnt - 1] << 8);
-            if (crc16 == get_crc16(rxbuf, cnt - 2))
-            {
-                modbus_dev.rx_count = cnt;
-                for (i = 0; i < cnt; i++)
-                {
-                    modbus_dev.rx_buf[i] = rxbuf[i];
-                }
-                modbus_dev.ok_flag = 1;
-            }
-            cnt = 0;
-        }
+        cnt = 0;
+        memset(rxbuf, 0, 256);
     }
     else
     {
-        cnt = 0;
-    }
-    if (cnt > 250)
-    {
-        cnt = 0;
+        if (cnt > 2)
+        {
+            if (rxbuf[1] == 0x10) // 01 10 00 00 00 01 02 00 01 69 50 主站 功能码 寄存器地址 寄存器数量 字节数 后面的写入数据 校验
+            {
+                len = (rxbuf[6] + 8);
+                if (cnt > len)
+                {
+                    crc16 = rxbuf[cnt - 2] | (rxbuf[cnt - 1] << 8);
+                    if (crc16 == get_crc16(rxbuf, cnt - 2))
+                    {
+                        modbus_dev.rx_count = cnt;
+                        for (i = 0; i < cnt; i++)
+                        {
+                            modbus_dev.rx_buf[i] = rxbuf[i];
+                        }
+                        modbus_dev.ok_flag = 1;
+                    }
+                    memset(rxbuf, 0, 256);
+                    cnt = 0;
+                }
+            }
+            else if (rxbuf[1] == 0x03 || rxbuf[1] == 0x06) // 01 03 00 00 00 01 84 0A 主站 功能码 寄存器地址 寄存器数量/写入的数值 校验
+            {
+                len = 7;
+                if (cnt > len)
+                {
+                    crc16 = rxbuf[cnt - 2] | (rxbuf[cnt - 1] << 8);
+                    if (crc16 == get_crc16(rxbuf, cnt - 2))
+                    {
+                        modbus_dev.rx_count = cnt;
+                        for (i = 0; i < cnt; i++)
+                        {
+                            modbus_dev.rx_buf[i] = rxbuf[i];
+                        }
+                        modbus_dev.ok_flag = 1;
+                    }
+                    memset(rxbuf, 0, 256);
+                    cnt = 0;
+                }
+            }
+            else
+            {
+                memset(rxbuf, 0, 256);
+                cnt = 0;
+            }
+        }
     }
 }
 void modbus_03_slave(uint16_t *buf) // 01 03 02 00 01 84 0A 主站 功能码 寄存器数量 寄存器里面的内容 校验
@@ -274,7 +279,7 @@ void modbus_06_slave(uint16_t *buf) // 01 06 00 00 00 01 84 0A  原样返回
     len = 8;
     num = modbus_dev.rx_buf[2] << 8 | modbus_dev.rx_buf[3];
     buf[num] = modbus_dev.rx_buf[4] << 8 | modbus_dev.rx_buf[5];
-    modbus_dev.write_flag = num;
+    modbus_dev.write_flag = num;    
     uart1_printf(modbus_dev.rx_buf, len);
     uart4_printf(modbus_dev.rx_buf, len);
     // send

@@ -22,10 +22,8 @@
 #define ADDR_FLASH_SECTOR_10    ((u32)0x080C0000) 	//扇区10起始地址,128 Kbytes  
 #define ADDR_FLASH_SECTOR_11    ((u32)0x080E0000) 	//扇区11起始地址,128 Kbytes  
 
-
 void fmc_write(uint16_t num, uint16_t *data);
-uint16_t fmc_read(uint16_t num);
-void test_flash(void);
+void fmc_read(uint16_t num, uint16_t *data);
 #endif
 
 

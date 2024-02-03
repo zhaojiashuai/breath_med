@@ -36,11 +36,12 @@ void uart4_init(u32 bound)
     USART_Cmd(UART4, ENABLE);
 
     // 配置串口中断优先级
-    NVIC_InitTypeDef NVIC_InitStruct;
-    NVIC_InitStruct.NVIC_IRQChannel = UART4_IRQn;
-    NVIC_InitStruct.NVIC_IRQChannelPreemptionPriority = 3;
-    NVIC_InitStruct.NVIC_IRQChannelCmd = ENABLE;
-    NVIC_Init(&NVIC_InitStruct);
+    NVIC_InitTypeDef NVIC_InitStructure;
+    NVIC_InitStructure.NVIC_IRQChannel = UART4_IRQn;
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 2;
+    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;
+    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+    NVIC_Init(&NVIC_InitStructure);       
 }
 
 // buf:发送区首地址
@@ -66,6 +67,6 @@ void UART4_IRQHandler(void)
     {
         USART_ClearITPendingBit(UART4, USART_IT_RXNE); // 清除中断标志位
         res = USART_ReceiveData(UART4);                // 读取接收到的数据
-        modbus_slave_deal(res);
+        modbus_slave_deal(res,0x01);
     }
 }

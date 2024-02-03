@@ -330,16 +330,8 @@ void data_init(void)
     modbus_dis[pressure_kp] = 1000;
     modbus_dis[pressure_ki] = 0;
     modbus_dis[pressure_kd] = 0;
-
-    modbus_dis[pre_x1] = fmc_read(pre_x1);
-    modbus_dis[pre_y1] = fmc_read(pre_y1);
-    modbus_dis[pre_x2] = fmc_read(pre_x2);
-    modbus_dis[pre_y2] = fmc_read(pre_y2);
-
-    modbus_dis[flow_x1] = fmc_read(flow_x1);
-    modbus_dis[flow_y1] = fmc_read(flow_y1);
-    modbus_dis[flow_x2] = fmc_read(flow_x2);
-    modbus_dis[flow_y2] = fmc_read(flow_y2);
+    
+    fmc_read(pre_x1,modbus_dis);
 }
 
 void write_flash(void)
@@ -349,6 +341,7 @@ void write_flash(void)
         fmc_write(modbus_dev.write_flag, modbus_dis);
         modbus_dev.write_flag = 0;
     }
+    fmc_read(pre_x1,modbus_dis);
 }
 
 void print_task(void)

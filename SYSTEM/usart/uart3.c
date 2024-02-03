@@ -38,11 +38,12 @@ void uart3_init(u32 bound)
     USART_Cmd(USART3, ENABLE);
 
     // 配置串口中断优先级
-    NVIC_InitTypeDef NVIC_InitStruct;
-    NVIC_InitStruct.NVIC_IRQChannel = USART3_IRQn;
-    NVIC_InitStruct.NVIC_IRQChannelPreemptionPriority = 2;
-    NVIC_InitStruct.NVIC_IRQChannelCmd = ENABLE;
-    NVIC_Init(&NVIC_InitStruct);
+    NVIC_InitTypeDef NVIC_InitStructure;
+    NVIC_InitStructure.NVIC_IRQChannel = USART3_IRQn;
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 2;
+    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;
+    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+    NVIC_Init(&NVIC_InitStructure);    
 }
 
 // buf:发送区首地址
