@@ -14,38 +14,6 @@ void gpio_init(void)
     GPIO_Init(GPIOC, &GPIO_InitStructure);                                                         // ≥ı ºªØGPIO
 
     GPIO_SetBits(GPIOC, GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_3);
-}
-
-void pwm_io1_out(void)
-{
-    static uint8_t count = 0;
-    if (count++ < 50)
-    {
-        TEST_IO3 = 1;
-    }
-    else
-    {
-        TEST_IO3 = 0;
-    }
-    if (count >= 100)
-    {
-        count = 0;
-    }
-}
-
-void pwm_io2_out(void)
-{
-    static uint8_t count = 0;
-    if (count++ < 50)
-    {
-        TEST_IO4 = 1;
-    }
-    else
-    {
-        TEST_IO4 = 0;
-    }
-    if (count >= 100)
-    {
-        count = 0;
-    }
+    FAN_DIR = 0;
+    FAN_BREAK = 0;
 }

@@ -77,8 +77,6 @@ void TIM4_IRQHandler(void)
 {
     if (TIM_GetITStatus(TIM4, TIM_IT_Update) != RESET)
     {
-        pwm_io1_out();
-        pwm_io2_out();
         TIM_ClearITPendingBit(TIM4, TIM_IT_Update);
     }
 }

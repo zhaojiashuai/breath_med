@@ -154,7 +154,7 @@
           <Type>0</Type>
           <LineNumber>69</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134224204</Address>
+          <Address>134224436</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
@@ -252,6 +252,11 @@
           <count>13</count>
           <WinNumber>1</WinNumber>
           <ItemText>read_temp,0x0A</ItemText>
+        </Ww>
+        <Ww>
+          <count>14</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>count,0x0A</ItemText>
         </Ww>
       </WatchWindow1>
       <MemoryWindow1>

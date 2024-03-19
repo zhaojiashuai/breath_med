@@ -233,8 +233,9 @@ void set_sensor_value(void)
 {
     get_sensor_value();
     breath_Deal();
-    TIM_SetCompare1(TIM3, modbus_dis[fan_out]);     // 设定无刷风机
-    TIM_SetCompare2(TIM3, modbus_dis[p_value_out]); // 设定比例阀输出
+    // TIM_SetCompare1(TIM3, modbus_dis[fan_out]);     // 设定无刷风机
+    // TIM_SetCompare2(TIM3, modbus_dis[p_value_out]); // 设定比例阀输出
+    test_pwm();
 }
 
 // PID控制器更新函数
@@ -283,16 +284,19 @@ void pressure_closed(void)
     if (modbus_dis[breath_stat] == 1) // 恒压模式---射钉固定输出
     {
         modbus_dis[fan_out] = modbus_dis[set_pre];
+        FAN_BREAK = 0;
     }
     else // 跟随模式
     {
-        if (sensor.breath_stat == 1 && (sensor.berath_value - sensor.last_berath_value > 0)) // 吸气的时候并且吸气加速度为正的时候风机工作
+        if (sensor.breath_stat == 1 && (sensor.berath_value - sensor.last_berath_value > 0)&&(sensor.breath_pre<=modbus_dis[set_xi_pre])) // 吸气的时候并且吸气加速度为正的时候风机工作
         {
             modbus_dis[fan_out] = PID_cal(&pressure, modbus_dis[set_xi_pre], sensor.breath_pre, modbus_dis[pressure_kp], modbus_dis[pressure_ki], modbus_dis[pressure_kd]);
+            FAN_BREAK = 0;
         }
         else
         {
             modbus_dis[fan_out] = 0;
+            FAN_BREAK = 1;
         }
     }
 
