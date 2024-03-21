@@ -233,33 +233,47 @@ void set_sensor_value(void)
 {
     get_sensor_value();
     breath_Deal();
-    // TIM_SetCompare1(TIM3, modbus_dis[fan_out]);     // 设定无刷风机
-    // TIM_SetCompare2(TIM3, modbus_dis[p_value_out]); // 设定比例阀输出
-    test_pwm();
+    TIM_SetCompare1(TIM3, modbus_dis[fan_out]);     // 设定无刷风机
+    TIM_SetCompare2(TIM3, modbus_dis[p_value_out]); // 设定比例阀输出
 }
 
-// PID控制器更新函数
+// PID控制器更新函数（增量PID）
 uint16_t PID_cal(PIDController *pid, double setpoint, double input, uint16_t Kp, uint16_t Ki, uint16_t Kd)
 {
     uint16_t out;
-    pid->Kp = (double)Kp / 1000000;
-    pid->Ki = (double)Ki / 1000000;
-    pid->Kd = (double)Kd / 1000000;
-    // 计算偏差
-    pid->Err_P = setpoint - input;
+    // 更新PID参数
+    pid->Kp = (double)Kp / 10000;
+    pid->Ki = (double)Ki / 10000;
+    pid->Kd = (double)Kd / 10000;
 
-    pid->Err_I = pid->Err_P - pid->LastError;
-    pid->Err_D = pid->Err_P - 2 * pid->LastError + pid->L_LastError;
-    pid->Output += pid->Kp * pid->Err_P + pid->Ki * pid->Err_I + pid->Kd * pid->Err_D;
-    if (setpoint == 0 || pid->Output <= 0 || pid->Err_P < 0)
+    // 计算偏差
+    double error = setpoint - input;
+    pid->Timestamp = 1.0; // 初步定为1，更改此处可以改变计算的周期
+    // 计算积分项和微分项
+    double integral = pid->Integral + pid->Ki * error * pid->Timestamp;
+    double derivative = (error - pid->LastError) / pid->Timestamp;
+
+    // 计算输出增量
+    double outputIncrement = pid->Kp * error + integral + pid->Kd * derivative;
+
+    // 更新输出和误差历史
+    pid->Output += outputIncrement;
+    pid->LastError = error;
+    pid->Integral = integral;
+
+    // 限制输出
+    if (pid->Output > 500)
+    {
+        pid->Output = 500;
+    }
+    else if (pid->Output < 0)
     {
         pid->Output = 0;
-        pid->LastError = 0.0;
-        pid->L_LastError = 0.0;
     }
-    pid->L_LastError = pid->LastError;
-    pid->LastError = pid->Err_P;
+
+    // 获取最终的输出
     out = (uint16_t)pid->Output;
+
     return out;
 }
 
@@ -284,19 +298,22 @@ void pressure_closed(void)
     if (modbus_dis[breath_stat] == 1) // 恒压模式---射钉固定输出
     {
         modbus_dis[fan_out] = modbus_dis[set_pre];
-        FAN_BREAK = 0;
+        FAN_BREAK_OFF;
     }
     else // 跟随模式
     {
-        if (sensor.breath_stat == 1 && (sensor.berath_value - sensor.last_berath_value > 0)&&(sensor.breath_pre<=modbus_dis[set_xi_pre])) // 吸气的时候并且吸气加速度为正的时候风机工作
+        if (sensor.breath_stat == 1) // 吸气的时候并且吸气加速度为正的时候风机工作
         {
             modbus_dis[fan_out] = PID_cal(&pressure, modbus_dis[set_xi_pre], sensor.breath_pre, modbus_dis[pressure_kp], modbus_dis[pressure_ki], modbus_dis[pressure_kd]);
-            FAN_BREAK = 0;
-        }
-        else
-        {
-            modbus_dis[fan_out] = 0;
-            FAN_BREAK = 1;
+            if (sensor.breath_pre <= modbus_dis[set_xi_pre])
+            {
+                FAN_BREAK_OFF;
+            }
+            else
+            {
+                if (abs(sensor.breath_pre - modbus_dis[set_xi_pre]) > 10)
+                    FAN_BREAK_ON;
+            }
         }
     }
 
@@ -334,6 +351,16 @@ void data_init(void)
     modbus_dis[pressure_kp] = 1000;
     modbus_dis[pressure_ki] = 0;
     modbus_dis[pressure_kd] = 0;
+
+    // modbus_dis[pre_x1] = 255;
+    // modbus_dis[pre_y1] = 0;
+    // modbus_dis[pre_x2] = 200;
+    // modbus_dis[pre_y2] = 1000;
+
+    // modbus_dis[flow_x1] = 1834;
+    // modbus_dis[flow_y1] = 0;
+    // modbus_dis[flow_x2] = 1921;
+    // modbus_dis[flow_y2] = 500;
 
     fmc_read(pre_x1, modbus_dis);
 }

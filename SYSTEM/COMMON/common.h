@@ -43,15 +43,15 @@ typedef struct sensor // 氧气传感器信息
 
 typedef struct
 {
-    double Output;      // 输出值
-    double Err_P;       // P偏差
-    double Err_I;       // I偏差
-    double Err_D;       // D偏差
-    double Kp;          // 比例增益
-    double Ki;          // 积分增益
-    double Kd;          // 微分增益
-    double LastError;   // 上一次的偏差
-    double L_LastError; // 上上一次的偏差
+    double Setpoint;
+    double Input;
+    double Output;
+    double LastError;
+    double Integral;
+    double Timestamp;
+    double Kp;
+    double Ki;
+    double Kd;
 } PIDController;
 
 typedef struct device // 压缩机信息

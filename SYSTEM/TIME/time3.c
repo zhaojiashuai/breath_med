@@ -73,7 +73,7 @@ void TIM3_Int_Init(u16 arr, u16 psc)
 
 void test_pwm(void)
 {
-    static uint16_t count = 0;
+    static uint16_t count = 250;
     if (count > 500)
     {
         count = 0;

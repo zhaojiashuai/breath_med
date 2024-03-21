@@ -14,6 +14,6 @@ void gpio_init(void)
     GPIO_Init(GPIOC, &GPIO_InitStructure);                                                         // ≥ı ºªØGPIO
 
     GPIO_SetBits(GPIOC, GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_3);
-    FAN_DIR = 0;
-    FAN_BREAK = 0;
+    FAN_DIR_CW;
+    FAN_BREAK_ON;
 }
