@@ -24,5 +24,6 @@ JLinkLog.txt
 *.map 
 *.uvoptx
 *.Administrator
-
+*.uvguix.Administrator
+*.hex
 
