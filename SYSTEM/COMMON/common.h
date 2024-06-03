@@ -19,6 +19,7 @@
 #include "sensor.h"
 #include "flash.h"
 #include "modbusmaster.h"
+#include "process.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
