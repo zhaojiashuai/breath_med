@@ -262,3 +262,4 @@ data_get = ReadData(chn);
 delay_ms(1);	
 return data_get;
 }
+

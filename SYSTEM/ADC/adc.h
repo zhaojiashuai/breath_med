@@ -2,5 +2,5 @@
 #define __ADC_H
 #include "common.h"
 
-void Adc_Init(void); // ADCͨ����ʼ��
+void Adc_Init(void); 
 #endif
