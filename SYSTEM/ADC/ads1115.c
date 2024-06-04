@@ -1,6 +1,5 @@
 #include "ADS1115.h"
-#include "delay.h"
-#include "stm32f10x.h"
+
 
 u8 WriteIntBuf[10],WritepointBuf[10];
 
@@ -11,34 +10,43 @@ void delay_iic(void)  //??4?????,??4.34us
 
 void setADS1115_sda(u8 i)
 {
-	GPIO_InitTypeDef GPIO_InitStructure;
-	
-  RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOF,ENABLE);//GPIOB
+    GPIO_InitTypeDef GPIO_InitStructure;
+
+    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOB, ENABLE); // ʹ��GPIOCʱ��
+
+    GPIO_InitStructure.GPIO_Pin =   GPIO_Pin_9 ; // LEDIO��
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;                                                  // ��ͨ���ģʽ
+    GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;                                                 // �������
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;                                             // 100MHz
+    GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;                                                   // ����
+
 	
 	if(i)
 	{
-	GPIO_InitStructure.GPIO_Mode=GPIO_Mode_IN_FLOATING;	
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;                                                  // ��ͨ���ģʽ
+    GPIO_InitStructure.GPIO_OType = GPIO_OType_PP; 
 	}else
 	{
-	GPIO_InitStructure.GPIO_Mode=GPIO_Mode_Out_PP;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;                                                  // ��ͨ���ģʽ
+    GPIO_InitStructure.GPIO_OType = GPIO_OType_PP; 
 	}
-	GPIO_InitStructure.GPIO_Pin=GPIO_Pin_2;
-	GPIO_InitStructure.GPIO_Speed=GPIO_Speed_50MHz;
-	GPIO_Init(GPIOF,&GPIO_InitStructure);
-	//GPIO_SetBits(GPIOB,GPIO_Pin_7);
+    GPIO_Init(GPIOB, &GPIO_InitStructure);   
 }
 
 void ADS1115_init(void)
 {
-	GPIO_InitTypeDef GPIO_InitStructure;
-	
-  RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOF,ENABLE);//GPIOB
-	
-	GPIO_InitStructure.GPIO_Mode=GPIO_Mode_Out_PP;
-	GPIO_InitStructure.GPIO_Pin=GPIO_Pin_1|GPIO_Pin_2;
-	GPIO_InitStructure.GPIO_Speed=GPIO_Speed_50MHz;
-	GPIO_Init(GPIOF,&GPIO_InitStructure);
-	GPIO_SetBits(GPIOF,GPIO_Pin_1|GPIO_Pin_2);
+    GPIO_InitTypeDef GPIO_InitStructure;
+
+    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOB, ENABLE); // ʹ��GPIOCʱ��
+
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_8 | GPIO_Pin_9 ; // LEDIO��
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;                                                  // ��ͨ���ģʽ
+    GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;                                                 // �������
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;                                             // 100MHz
+    GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;                                                   // ����
+    GPIO_Init(GPIOB, &GPIO_InitStructure);                                                         // ��ʼ��GPIO
+
+    GPIO_SetBits(GPIOB, GPIO_Pin_8 | GPIO_Pin_9);
 }
 
 void Init__ADS1115(void)
@@ -145,16 +153,16 @@ void ReceiveAck_1115(void)
 
 void Acknowledge_1115(void)
 {
-sda_L;
-delay_iic();
-scl_L;
-delay_iic();
-scl_H;
-delay_iic();
-scl_L;
-delay_iic();
-sda_H; 
-delay_iic();
+  sda_L;
+  delay_iic();
+  scl_L;
+  delay_iic();
+  scl_H;
+  delay_iic();
+  scl_L;
+  delay_iic();
+  sda_H; 
+  delay_iic();
 }
 
  void Confige1115 (u8 port)

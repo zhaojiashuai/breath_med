@@ -2,8 +2,8 @@
 
 // ��ʼ��ADC
 void Adc_Init(void)
-{
-    GPIO_InitTypeDef GPIO_InitStructure;
+{ 
+      GPIO_InitTypeDef GPIO_InitStructure  ;
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE); // ʹ��GPIOAʱ��
 	// �ȳ�ʼ��ADC1ͨ��5 IO��
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_4 | GPIO_Pin_5 | GPIO_Pin_6 | GPIO_Pin_7; // PA4��5��6��7 ͨ��4��5��6��7

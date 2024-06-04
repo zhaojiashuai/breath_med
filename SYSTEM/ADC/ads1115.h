@@ -1,6 +1,6 @@
 #ifndef __ADS1115_H
 #define __ADS1115_H
-#include "stm32f10x.h"
+#include "common.h"
 
 
 #define CMD_Write           0x90     //write cmd 10010000 is addr "1":read  "0":write

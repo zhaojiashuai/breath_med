@@ -2,5 +2,5 @@
 #define __ADC_H
 #include "common.h"
 
-void Adc_Init(void); // ADC通道初始化
+void Adc_Init(void); // ADC通锟斤拷锟斤拷始锟斤拷
 #endif
