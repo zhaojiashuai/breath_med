@@ -3,14 +3,15 @@
 RCC_ClocksTypeDef clk = {0};
 int main(void)
 {
-	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2); // ÉèÖÃÏµÍ³ÖÐ¶ÏÓÅÏÈ¼¶·Ö×é2
+	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2); // ï¿½ï¿½ï¿½ï¿½ÏµÍ³ï¿½Ð¶ï¿½ï¿½ï¿½ï¿½È¼ï¿½ï¿½ï¿½ï¿½ï¿½2
 	delay_init(168);
-	delay_ms(2000); // µÈ´ýÏµÍ³ÉÏµçµÄÑÓ³Ù£¬µÈ´ýÆÁÄ»ÉÏµçºóµÄÍ¨Ñ¶
+	delay_ms(2000); // ï¿½È´ï¿½ÏµÍ³ï¿½Ïµï¿½ï¿½ï¿½Ó³Ù£ï¿½ï¿½È´ï¿½ï¿½ï¿½Ä»ï¿½Ïµï¿½ï¿½ï¿½Í¨Ñ¶
 	RCC_GetClocksFreq(&clk);
 	gpio_init();
 	bsp_InitAdcDMA();
 	Adc_Init();
-	TIM3_Int_Init(500 - 1, 84 - 1); // 84M/84=1MhzµÄ¼ÆÊýÆµÂÊ,ÖØ×°ÔØÖµ500£¬ËùÒÔPWMÆµÂÊÎª 1M/500=2Khz.
+	Init__ADS1115();
+	TIM3_Int_Init(500 - 1, 84 - 1); // 84M/84=1Mhzï¿½Ä¼ï¿½ï¿½ï¿½Æµï¿½ï¿½,ï¿½ï¿½×°ï¿½ï¿½Öµ500ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½PWMÆµï¿½ï¿½Îª 1M/500=2Khz.
 	TIM2_Configuration();			//
 	TIM4_Configuration();
 	uart_init(9600);
@@ -18,7 +19,7 @@ int main(void)
 	uart3_init(9600);
 	uart4_init(9600);
 	uart5_init(9600);
-	data_init(); // ³õÊ¼»¯Êý¾ÝÏÔÊ¾
+	data_init(); // ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¾
 	while (1)
 	{
 		task_run();

@@ -16,7 +16,7 @@ void zhjw_test(void)
     machine.err_code = rand() % 255;
     output.oxygen = rand() % 1000 / 10;
 }
-/*Êý¾Ý×Ô¶¯±ê¶¨*/
+/*ï¿½ï¿½ï¿½ï¿½ï¿½Ô¶ï¿½ï¿½ê¶¨*/
 void liner_cal(void)
 {
     float f, f1;
@@ -60,16 +60,16 @@ void get_sensor_value(void)
     {
         f = 0;
     }
-    sensor.breath_pre = (uint16_t)(f + 1000 - modbus_dis[breath_offset]); // Ôö¼ÓÆ«ÒÆÌá¸ßÏµÍ³ÎÈ¶¨ÐÔ
+    sensor.breath_pre = (uint16_t)(f + 1000 - modbus_dis[breath_offset]); // ï¿½ï¿½ï¿½ï¿½Æ«ï¿½ï¿½ï¿½ï¿½ï¿½ÏµÍ³ï¿½È¶ï¿½ï¿½ï¿½
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////
     sensor.last_berath_value = sensor.berath_value;
     f = (double)get_adc_value(1);
     f = sliding_average_filter(&berath_value, f);
     f = f * sensor.k_valu + sensor.b_valu;
-    sensor.berath_value = (int16_t)(f + 1000 - modbus_dis[huxi_offset]); // Ôö¼ÓÆ«ÒÆÌá¸ßÏµÍ³ÎÈ¶¨ÐÔ
+    sensor.berath_value = (int16_t)(f + 1000 - modbus_dis[huxi_offset]); // ï¿½ï¿½ï¿½ï¿½Æ«ï¿½ï¿½ï¿½ï¿½ï¿½ÏµÍ³ï¿½È¶ï¿½ï¿½ï¿½
     // zhjw_test();
-    if (abs(sensor.berath_value) < 3) // ¼õÐ¡ÏµÍ³ÎÈ¶¨Îó²î
+    if (abs(sensor.berath_value) < 3) // ï¿½ï¿½Ð¡ÏµÍ³ï¿½È¶ï¿½ï¿½ï¿½ï¿½
     {
         sensor.breath_stat = 0;
     }
@@ -82,7 +82,7 @@ void get_sensor_value(void)
         sensor.breath_stat = -1;
     }
 }
-/*·§Ðò¿ØÖÆÂß¼­*/
+/*ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ß¼ï¿½*/
 void valve_control(void)
 {
     uint16_t temp = 0;
@@ -122,7 +122,7 @@ void valve_control(void)
     }
 }
 
-/*ÖÜÆÚ»ñÈ¡Á÷Á¿»ý·Ö*/
+/*ï¿½ï¿½ï¿½Ú»ï¿½È¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½*/
 void get_breathcount(void)
 {
     static int8_t last_stat = 0;
@@ -131,10 +131,10 @@ void get_breathcount(void)
         sensor.breath_count = 0;
         last_stat = sensor.breath_stat;
     }
-    if (sensor.breath_stat != 0) // ¸ù¾ÝºôÎü×´Ì¬»ñÈ¡ºôÎüÁ÷Á¿ÀÛ¼ÆÖµ
+    if (sensor.breath_stat != 0) // ï¿½ï¿½ï¿½Ýºï¿½ï¿½ï¿½×´Ì¬ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Û¼ï¿½Öµ
         sensor.breath_count += sensor.berath_value / 1000;
 }
-/*¶¨Ê±Æ÷µÄÈÎÎñÀÛ¼ÆºÍ´¦ÀíÈÎÎñ--1ms*/
+/*ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Û¼ÆºÍ´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½--1ms*/
 void timing_task(void)
 {
     valve_control();
@@ -144,16 +144,16 @@ void timing_task(void)
 void get_breathvalue(uint32_t time)
 {
     int32_t value = 0;
-    if (sensor.breath_stat == 1) // ÎüÆø×´Ì¬¼ÆËãºôÆø»ý·ÖÁ¿
+    if (sensor.breath_stat == 1) // ï¿½ï¿½ï¿½ï¿½×´Ì¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     {
-        value = -sensor.breath_count * time / 1000 / 60; // L/min×ª»¯³Éml 10ÊÇÏµÊý
+        value = -sensor.breath_count * time / 1000 / 60; // L/min×ªï¿½ï¿½ï¿½ï¿½ml 10ï¿½ï¿½Ïµï¿½ï¿½
         modbus_dis[huqivalue_5] = modbus_dis[huqivalue_4];
         modbus_dis[huqivalue_4] = modbus_dis[huqivalue_3];
         modbus_dis[huqivalue_3] = modbus_dis[huqivalue_2];
         modbus_dis[huqivalue_2] = modbus_dis[huqivalue_1];
         modbus_dis[huqivalue_1] = value;
     }
-    else if (sensor.breath_stat == -1) // ºôÆø×´Ì¬¼ÆËãÎüÆø»ý·Ö
+    else if (sensor.breath_stat == -1) // ï¿½ï¿½ï¿½ï¿½×´Ì¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     {
         value = sensor.breath_count * time / 1000 / 60;
         modbus_dis[xiqivalue_5] = modbus_dis[xiqivalue_4];
@@ -187,7 +187,7 @@ void breath_Deal(void)
     }
     if (sensor.breath_stat == 0) // 7ms
     {
-        if (count++ > 500) // 3.5sÃ»ÓÐºôÎüµÄ×´Ì¬
+        if (count++ > 500) // 3.5sÃ»ï¿½Ðºï¿½ï¿½ï¿½ï¿½ï¿½×´Ì¬
         {
             count = 500;
             in_time = 0;
@@ -200,8 +200,8 @@ void breath_Deal(void)
         count = 0;
     }
 
-    sensor.breath_frq = 60000 / (in_time + out_time); // ºôÎüÆµÂÊ
-    sensor.breath_rat = in_time * 100 / out_time;     // Îüºô±È
+    sensor.breath_frq = 60000 / (in_time + out_time); // ï¿½ï¿½ï¿½ï¿½Æµï¿½ï¿½
+    sensor.breath_rat = in_time * 100 / out_time;     // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 }
 
 void display_trans(void)
@@ -216,11 +216,11 @@ void display_trans(void)
     modbus_dis[huxi_freq] = sensor.breath_frq;
     modbus_dis[huxi_ratio] = sensor.breath_rat;
 
-    modbus_dis[huxi_flow] = sensor.berath_value; ////ÎªÁË½â¾ö´«ÊäÖÐ²»ÄÜ³öÏÖ¸ºÊýµÄÎÊÌâ
+    modbus_dis[huxi_flow] = sensor.berath_value; ////Îªï¿½Ë½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð²ï¿½ï¿½Ü³ï¿½ï¿½Ö¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     modbus_dis[breath_pressure] = sensor.breath_pre;
     modbus_dis[chaoqi_value] = modbus_dis[xiqivalue_1];
     modbus_slave_parse(modbus_dis);
-    // ½âÎöµ½Ö®ºó°ÑÊý¾ÝÉè¶¨µ½Ö¸¶¨½á¹¹ÌåÖ®ÖÐ
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö®ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½è¶¨ï¿½ï¿½Ö¸ï¿½ï¿½ï¿½á¹¹ï¿½ï¿½Ö®ï¿½ï¿½
 }
 
 void datatrans_deal(void)
@@ -233,35 +233,35 @@ void set_sensor_value(void)
 {
     get_sensor_value();
     breath_Deal();
-    TIM_SetCompare1(TIM3, modbus_dis[fan_out]);     // Éè¶¨ÎÞË¢·ç»ú
-    TIM_SetCompare2(TIM3, modbus_dis[p_value_out]); // Éè¶¨±ÈÀý·§Êä³ö
+    TIM_SetCompare1(TIM3, modbus_dis[fan_out]);     // ï¿½è¶¨ï¿½ï¿½Ë¢ï¿½ï¿½ï¿½
+    TIM_SetCompare2(TIM3, modbus_dis[p_value_out]); // ï¿½è¶¨ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 }
 
-// PID¿ØÖÆÆ÷¸üÐÂº¯Êý£¨ÔöÁ¿PID£©
+// PIDï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Âºï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½PIDï¿½ï¿½
 uint16_t PID_cal(PIDController *pid, double setpoint, double input, uint16_t Kp, uint16_t Ki, uint16_t Kd)
 {
     uint16_t out;
-    // ¸üÐÂPID²ÎÊý
+    // ï¿½ï¿½ï¿½ï¿½PIDï¿½ï¿½ï¿½ï¿½
     pid->Kp = (double)Kp / 10000;
     pid->Ki = (double)Ki / 10000;
     pid->Kd = (double)Kd / 10000;
 
-    // ¼ÆËãÆ«²î
+    // ï¿½ï¿½ï¿½ï¿½Æ«ï¿½ï¿½
     double error = setpoint - input;
-    pid->Timestamp = 1.0; // ³õ²½¶¨Îª1£¬¸ü¸Ä´Ë´¦¿ÉÒÔ¸Ä±ä¼ÆËãµÄÖÜÆÚ
-    // ¼ÆËã»ý·ÖÏîºÍÎ¢·ÖÏî
+    pid->Timestamp = 1.0; // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Îª1ï¿½ï¿½ï¿½ï¿½ï¿½Ä´Ë´ï¿½ï¿½ï¿½ï¿½Ô¸Ä±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Î¢ï¿½ï¿½ï¿½ï¿½
     double integral = pid->Integral + pid->Ki * error * pid->Timestamp;
     double derivative = (error - pid->LastError) / pid->Timestamp;
 
-    // ¼ÆËãÊä³öÔöÁ¿
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     double outputIncrement = pid->Kp * error + integral + pid->Kd * derivative;
 
-    // ¸üÐÂÊä³öºÍÎó²îÀúÊ·
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê·
     pid->Output += outputIncrement;
     pid->LastError = error;
     pid->Integral = integral;
 
-    // ÏÞÖÆÊä³ö
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     if (pid->Output > 500)
     {
         pid->Output = 500;
@@ -271,7 +271,7 @@ uint16_t PID_cal(PIDController *pid, double setpoint, double input, uint16_t Kp,
         pid->Output = 0;
     }
 
-    // »ñÈ¡×îÖÕµÄÊä³ö
+    // ï¿½ï¿½È¡ï¿½ï¿½ï¿½Õµï¿½ï¿½ï¿½ï¿½
     out = (uint16_t)pid->Output;
 
     return out;
@@ -295,14 +295,14 @@ void mixed_closed(void)
 void pressure_closed(void)
 {
     static PIDController pressure = {0};
-    if (modbus_dis[breath_stat] == 1) // ºãÑ¹Ä£Ê½---Éä¶¤¹Ì¶¨Êä³ö
+    if (modbus_dis[breath_stat] == 1) // ï¿½ï¿½Ñ¹Ä£Ê½---ï¿½ä¶¤ï¿½Ì¶ï¿½ï¿½ï¿½ï¿½
     {
         modbus_dis[fan_out] = modbus_dis[set_pre];
         FAN_BREAK_OFF;
     }
-    else // ¸úËæÄ£Ê½
+    else // ï¿½ï¿½ï¿½ï¿½Ä£Ê½
     {
-        if (sensor.breath_stat == 1) // ÎüÆøµÄÊ±ºò²¢ÇÒÎüÆø¼ÓËÙ¶ÈÎªÕýµÄÊ±ºò·ç»ú¹¤×÷
+        if (sensor.breath_stat == 1) // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ù¶ï¿½Îªï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
         {
             modbus_dis[fan_out] = PID_cal(&pressure, modbus_dis[set_xi_pre], sensor.breath_pre, modbus_dis[pressure_kp], modbus_dis[pressure_ki], modbus_dis[pressure_kd]);
             if (sensor.breath_pre <= modbus_dis[set_xi_pre])
@@ -378,4 +378,12 @@ void print_task(void)
 {
     // printf("adc1:%d,adc2:%d\r\n", get_adc_value(0), get_adc_value(1));
     // printf("breath_pre:%d,berath_value:%d\r\n", sensor.breath_pre, sensor.berath_value);
+}
+
+uint16_t adc_bu[3];
+void adc_Cal(void)
+{
+    adc_bu[0] = Get_ATOD(0);
+    adc_bu[1] = Get_ATOD(1);
+    adc_bu[2] = Get_ATOD(2);
 }

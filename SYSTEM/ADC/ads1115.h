@@ -12,13 +12,13 @@
 
 
 
-#define				scl_H					GPIO_SetBits(GPIOF,GPIO_Pin_1)
-#define				scl_L					GPIO_ResetBits(GPIOF,GPIO_Pin_1)
+#define				scl_H					GPIO_SetBits(GPIOB,GPIO_Pin_6)
+#define				scl_L					GPIO_ResetBits(GPIOB,GPIO_Pin_6)
 
-#define				sda_H					GPIO_SetBits(GPIOF,GPIO_Pin_2)
-#define				sda_L					GPIO_ResetBits(GPIOF,GPIO_Pin_2)
+#define				sda_H					GPIO_SetBits(GPIOB,GPIO_Pin_7)
+#define				sda_L					GPIO_ResetBits(GPIOB,GPIO_Pin_7)
 
-#define				sda_st				    GPIO_ReadInputDataBit(GPIOF,GPIO_Pin_2)
+#define				sda_st				    GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_7)
 
 #define				sda_out				    setADS1115_sda(0)
 #define				sda_in				    setADS1115_sda(1)

@@ -25,6 +25,7 @@
 #include <string.h>
 #include <math.h>
 #include "stm32f4xx_rcc.h"
+#include "ADS1115.h"
 
 #define BUFFER_SIZE 10
 
@@ -34,7 +35,7 @@ typedef struct common
     uint16_t index;
 } filter_t, *filter_ptr;
 
-typedef struct sensor // ÑõÆø´«¸ÐÆ÷ÐÅÏ¢
+typedef struct sensor // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢
 {
     int16_t oxygen;
     int16_t flow;
@@ -55,7 +56,7 @@ typedef struct
     double Kd;
 } PIDController;
 
-typedef struct device // Ñ¹Ëõ»úÐÅÏ¢
+typedef struct device // Ñ¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢
 {
     uint8_t en;
     uint8_t dir;
@@ -68,72 +69,72 @@ typedef struct device // Ñ¹Ëõ»úÐÅÏ¢
 typedef struct display
 {
     int8_t  breath_stat;
-    int16_t berath_value;     // ºôÎüÁ÷Á¿
-    int16_t last_berath_value;     // ÉÏÒ»´ÎºôÎüÁ÷Á¿
-    uint16_t breath_pre;     // ºôÎüÑ¹Á¦   
-    uint16_t last_breath_pre;     // ÉÏÒ»´ÎºôÎüÑ¹Á¦    
-    uint16_t breath_frq;        // ºôÎüÆµÂÊ
-    uint16_t breath_rat;        // Îüºô±È
-    int32_t breath_count;       //ºôÎüÁ÷Á¿»ý·Ö
-    float k_pre;//Ð±ÂÊ
-    float b_pre;//Æ«ÒÆ
-    float k_valu;//Ð±ÂÊ
-    float b_valu;//Æ«ÒÆ    
+    int16_t berath_value;     // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+    int16_t last_berath_value;     // ï¿½ï¿½Ò»ï¿½Îºï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+    uint16_t breath_pre;     // ï¿½ï¿½ï¿½ï¿½Ñ¹ï¿½ï¿½   
+    uint16_t last_breath_pre;     // ï¿½ï¿½Ò»ï¿½Îºï¿½ï¿½ï¿½Ñ¹ï¿½ï¿½    
+    uint16_t breath_frq;        // ï¿½ï¿½ï¿½ï¿½Æµï¿½ï¿½
+    uint16_t breath_rat;        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+    int32_t breath_count;       //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+    float k_pre;//Ð±ï¿½ï¿½
+    float b_pre;//Æ«ï¿½ï¿½
+    float k_valu;//Ð±ï¿½ï¿½
+    float b_valu;//Æ«ï¿½ï¿½    
 } display_t, *display_ptr;
 
 typedef enum 
 {
-    concentrator_oxygen = 0,//ÖÆÑõ»úÑõÆøÅ¨¶È------------Ñ¹Ëõ»úµ÷½ÚÊ¹ÓÃ
-    concentrator_flow,//ÖÆÑõ»úÁ÷Á¿
-    Compressor_speed,//Ñ¹Ëõ»úËÙ¶È
-    Compressor_err,//Ñ¹Ëõ»ú´íÎóÂë
-    Compressor_setspeed,//Ñ¹Ëõ»úÉè¶¨ËÙ¶È
-    mixed_oxygen,//»ìÑõÅ¨¶È
-    mixed_setoxygen,//»ìÑõÉè¶¨Å¨¶È---------±ÈÀý·§µ÷½ÚÊ¹ÓÃ
-    breath_pressure,//ºôÎüÑ¹Á¦-----------Ñ¹Á¦´«¸ÐÆ÷²É¼¯ËùµÃ
-    breath_offset,//ºôÎüÑ¹Á¦Æ«ÒÆ-----------Ñ¹Á¦´«¸ÐÆ÷²É¼¯ËùµÃ
-    set_xi_pre,//Éè¶¨ÎüÏàÑ¹Á¦
-    set_hu_pre,//Éè¶¨ºôÏàÑ¹Á¦
-    set_pre,//Éè¶¨¸úËæÑ¹Á¦
-    xiqivalue_1,//ÎüÆøÁ¿1
-    xiqivalue_2,//ÎüÆøÁ¿2
-    xiqivalue_3,//ÎüÆøÁ¿3
-    xiqivalue_4,//ÎüÆøÁ¿4
-    xiqivalue_5,//ÎüÆøÁ¿5
-    huqivalue_1,//ºôÆøÁ¿1
-    huqivalue_2,//ºôÆøÁ¿2
-    huqivalue_3,//ºôÆøÁ¿3
-    huqivalue_4,//ºôÆøÁ¿4
-    huqivalue_5,//ºôÆøÁ¿5
-    huxi_flow,//ºôÎüÁ÷Á¿
-    huxi_offset,//ºôÎüÁ÷Á¿Æ«ÒÆ
-    chaoqi_value,//³±ÆøÁ¿----------¾ÍÊÇÎüÆøÁ¿
-    huxi_freq,//ºôÎüÆµÂÊ
-    huxi_ratio,//ºôÎü±È
-    debug_mode,//µ÷ÊÔÄ£Ê½
-    p_value_out,//±ÈÀý·§Êä³ö
-    fan_out,//·ç»úÊä³ö
-    relay_plus,//·§Ðò1Ê±¼ä
-    relay_cycle,//·§Ðò2Ê±¼ä
-    Compressor_kp,//ÖÆÑõ»úPID²ÎÊý
-    Compressor_ki,//ÖÆÑõ»úPID²ÎÊý
-    Compressor_kd,//ÖÆÑõ»úPID²ÎÊý
-    mixed_kp,//»ìÑõPID²ÎÊý
-    mixed_ki,//»ìÑõPID²ÎÊý
-    mixed_kd,//»ìÑõPID²ÎÊý
-    pressure_kp,//Ñ¹Á¦PID²ÎÊý
-    pressure_ki,//Ñ¹Á¦PID²ÎÊý
-    pressure_kd,//Ñ¹Á¦PID²ÎÊý
-    breath_stat,//ºôÎüÄ£Ê½
-    cal_stat,//²É¼¯µÄ×´Ì¬
-    pre_x1,//Ñ¹Á¦±ê¶¨X1Öµ--´æ´¢×´Ì¬¿ªÊ¼Öµ
-    pre_y1,//Ñ¹Á¦±ê¶¨Y1Öµ
-    pre_x2,//Ñ¹Á¦±ê¶¨X2Öµ
-    pre_y2,//Ñ¹Á¦±ê¶¨Y1Öµ
-    flow_x1,//Á÷Á¿±ê¶¨X1Öµ
-    flow_y1,//Á÷Á¿±ê¶¨Y1Öµ
-    flow_x2,//Á÷Á¿±ê¶¨X2Öµ
-    flow_y2,//Á÷Á¿±ê¶¨Y2Öµ 
+    concentrator_oxygen = 0,//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Å¨ï¿½ï¿½------------Ñ¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¹ï¿½ï¿½
+    concentrator_flow,//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+    Compressor_speed,//Ñ¹ï¿½ï¿½ï¿½ï¿½ï¿½Ù¶ï¿½
+    Compressor_err,//Ñ¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+    Compressor_setspeed,//Ñ¹ï¿½ï¿½ï¿½ï¿½ï¿½è¶¨ï¿½Ù¶ï¿½
+    mixed_oxygen,//ï¿½ï¿½ï¿½ï¿½Å¨ï¿½ï¿½
+    mixed_setoxygen,//ï¿½ï¿½ï¿½ï¿½ï¿½è¶¨Å¨ï¿½ï¿½---------ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¹ï¿½ï¿½
+    breath_pressure,//ï¿½ï¿½ï¿½ï¿½Ñ¹ï¿½ï¿½-----------Ñ¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½É¼ï¿½ï¿½ï¿½ï¿½ï¿½
+    breath_offset,//ï¿½ï¿½ï¿½ï¿½Ñ¹ï¿½ï¿½Æ«ï¿½ï¿½-----------Ñ¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½É¼ï¿½ï¿½ï¿½ï¿½ï¿½
+    set_xi_pre,//ï¿½è¶¨ï¿½ï¿½ï¿½ï¿½Ñ¹ï¿½ï¿½
+    set_hu_pre,//ï¿½è¶¨ï¿½ï¿½ï¿½ï¿½Ñ¹ï¿½ï¿½
+    set_pre,//ï¿½è¶¨ï¿½ï¿½ï¿½ï¿½Ñ¹ï¿½ï¿½
+    xiqivalue_1,//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½1
+    xiqivalue_2,//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½2
+    xiqivalue_3,//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½3
+    xiqivalue_4,//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½4
+    xiqivalue_5,//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½5
+    huqivalue_1,//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½1
+    huqivalue_2,//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½2
+    huqivalue_3,//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½3
+    huqivalue_4,//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½4
+    huqivalue_5,//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½5
+    huxi_flow,//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+    huxi_offset,//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ«ï¿½ï¿½
+    chaoqi_value,//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½----------ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+    huxi_freq,//ï¿½ï¿½ï¿½ï¿½Æµï¿½ï¿½
+    huxi_ratio,//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+    debug_mode,//ï¿½ï¿½ï¿½ï¿½Ä£Ê½
+    p_value_out,//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+    fan_out,//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+    relay_plus,//ï¿½ï¿½ï¿½ï¿½1Ê±ï¿½ï¿½
+    relay_cycle,//ï¿½ï¿½ï¿½ï¿½2Ê±ï¿½ï¿½
+    Compressor_kp,//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½PIDï¿½ï¿½ï¿½ï¿½
+    Compressor_ki,//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½PIDï¿½ï¿½ï¿½ï¿½
+    Compressor_kd,//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½PIDï¿½ï¿½ï¿½ï¿½
+    mixed_kp,//ï¿½ï¿½ï¿½ï¿½PIDï¿½ï¿½ï¿½ï¿½
+    mixed_ki,//ï¿½ï¿½ï¿½ï¿½PIDï¿½ï¿½ï¿½ï¿½
+    mixed_kd,//ï¿½ï¿½ï¿½ï¿½PIDï¿½ï¿½ï¿½ï¿½
+    pressure_kp,//Ñ¹ï¿½ï¿½PIDï¿½ï¿½ï¿½ï¿½
+    pressure_ki,//Ñ¹ï¿½ï¿½PIDï¿½ï¿½ï¿½ï¿½
+    pressure_kd,//Ñ¹ï¿½ï¿½PIDï¿½ï¿½ï¿½ï¿½
+    breath_stat,//ï¿½ï¿½ï¿½ï¿½Ä£Ê½
+    cal_stat,//ï¿½É¼ï¿½ï¿½ï¿½×´Ì¬
+    pre_x1,//Ñ¹ï¿½ï¿½ï¿½ê¶¨X1Öµ--ï¿½æ´¢×´Ì¬ï¿½ï¿½Ê¼Öµ
+    pre_y1,//Ñ¹ï¿½ï¿½ï¿½ê¶¨Y1Öµ
+    pre_x2,//Ñ¹ï¿½ï¿½ï¿½ê¶¨X2Öµ
+    pre_y2,//Ñ¹ï¿½ï¿½ï¿½ê¶¨Y1Öµ
+    flow_x1,//ï¿½ï¿½ï¿½ï¿½ï¿½ê¶¨X1Öµ
+    flow_y1,//ï¿½ï¿½ï¿½ï¿½ï¿½ê¶¨Y1Öµ
+    flow_x2,//ï¿½ï¿½ï¿½ï¿½ï¿½ê¶¨X2Öµ
+    flow_y2,//ï¿½ï¿½ï¿½ï¿½ï¿½ê¶¨Y2Öµ 
     all_num,   
 }modbus;
 

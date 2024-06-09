@@ -14,7 +14,7 @@ void setADS1115_sda(u8 i)
 
     RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOB, ENABLE); // ʹ��GPIOCʱ��
 
-    GPIO_InitStructure.GPIO_Pin =   GPIO_Pin_9 ; // LEDIO��
+    GPIO_InitStructure.GPIO_Pin =   GPIO_Pin_7 ; // LEDIO��
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;                                                  // ��ͨ���ģʽ
     GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;                                                 // �������
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;                                             // 100MHz
@@ -39,14 +39,14 @@ void ADS1115_init(void)
 
     RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOB, ENABLE); // ʹ��GPIOCʱ��
 
-    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_8 | GPIO_Pin_9 ; // LEDIO��
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_6 | GPIO_Pin_7 ; // LEDIO��
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;                                                  // ��ͨ���ģʽ
     GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;                                                 // �������
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;                                             // 100MHz
     GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;                                                   // ����
     GPIO_Init(GPIOB, &GPIO_InitStructure);                                                         // ��ʼ��GPIO
 
-    GPIO_SetBits(GPIOB, GPIO_Pin_8 | GPIO_Pin_9);
+    GPIO_SetBits(GPIOB, GPIO_Pin_6 | GPIO_Pin_7);
 }
 
 void Init__ADS1115(void)
@@ -225,18 +225,13 @@ static u16 ReadData (u8 chnnal1)
 { 
 
 		u16 data;
-
 		Start_1115();
-
 		WriteByte_1115(0x91);
 		ReceiveAck_1115();
-
 		ReadBuffer[0] = ReadByte_1115();
 		ReceiveAck_1115();
-
 		ReadBuffer[1] = ReadByte_1115(); ////??????
 		Acknowledge_1115();
-
 		Stop_1115();
 		data = (ReadBuffer[0]<<8)|ReadBuffer[1];
 		if(data>0x7fff)// fu ya 

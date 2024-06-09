@@ -2,8 +2,7 @@
 #define _TASK_H
 #include "common.h"
 
-extern uint8_t task_tic;
-
+void task_time(uint32_t cnt);
 void task_run(void);
 
 #endif

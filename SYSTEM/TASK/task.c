@@ -1,35 +1,57 @@
 #include "task.h"
 #include "common.h"
 
-uint8_t task_tic = 0;
+#define     TASK_5MS        0X01
+#define     TASK_10MS        0X02
+#define     TASK_100MS        0X04
+#define     TASK_1000MS        0X08
+
+uint32_t task_flag = 0;
+
+void task_time(uint32_t cnt)
+{
+    if(cnt%5==0)
+    {
+        task_flag|=TASK_5MS;
+    }
+    if(cnt%10==0)
+    {
+        task_flag|=TASK_10MS;
+    }  
+    if(cnt%100==0)
+    {
+        task_flag|=TASK_100MS;
+         
+    }   
+    if(cnt%1000==0)
+    {
+        task_flag|=TASK_1000MS;
+    }         
+}
 
 void task_run(void)
 {
-    static uint32_t task_time = 0;
-    if (task_tic == 0)
-        return;
-    task_tic = 0;
-    task_time++;
-    if (task_time % 5 == 0) // 5ms
+    if(task_flag&TASK_5MS)
     {
+        task_flag&=~TASK_5MS;
         set_sensor_value();
     }
-    if (task_time % 10 == 0) // 10ms
+    if(task_flag&TASK_10MS)
     {
-
-    }
-    if (task_time % 20 == 0) // 20ms
+        task_flag&=~TASK_10MS;
+        adc_Cal();
+    } 
+    if(task_flag&TASK_100MS)
     {
-    }
-    if (task_time % 100 == 0) // 100ms
-    {
+        task_flag&=~TASK_100MS;
         datatrans_deal();
-        closed_loop_control();        
-    }
-    if (task_time % 500 == 0) // 500ms
+        closed_loop_control();          
+    }  
+    if(task_flag&TASK_1000MS)
     {
+        task_flag&=~TASK_1000MS;
         write_flash();        
         LED = !LED;
-        print_task();
-    }
+        print_task();         
+    }         
 }

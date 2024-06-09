@@ -1,17 +1,17 @@
 #include "time14.h"
 
 /*
-计数频率 = 时钟源频率 / (预分频值 + 1)
-定时时间 = 自动重载计数值 / 计数频率
+锟斤拷锟斤拷频锟斤拷 = 时锟斤拷源频锟斤拷 / (预锟斤拷频值 + 1)
+锟斤拷时时锟斤拷 = 锟皆讹拷锟斤拷锟截硷拷锟斤拷值 / 锟斤拷锟斤拷频锟斤拷
 */
 void TIM2_Configuration(void) // 1ms
 {
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
 
     TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
-    TIM_TimeBaseStructure.TIM_Prescaler = 84 - 1; // 根据需要调整分频系数
+    TIM_TimeBaseStructure.TIM_Prescaler = 84 - 1; // 锟斤拷锟斤拷锟斤拷要锟斤拷锟斤拷锟斤拷频系锟斤拷
     TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
-    TIM_TimeBaseStructure.TIM_Period = 1000 - 1; // 根据需要调整计数周期
+    TIM_TimeBaseStructure.TIM_Period = 1000 - 1; // 锟斤拷锟斤拷锟斤拷要锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷
     TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV1;
     TIM_TimeBaseStructure.TIM_RepetitionCounter = 0;
 
@@ -31,30 +31,30 @@ void TIM2_Configuration(void) // 1ms
 }
 
 uint32_t g_count = 0;
-
+uint32_t task_cnt = 0;
 void TIM2_IRQHandler(void)
 {
     if (TIM_GetITStatus(TIM2, TIM_IT_Update) != RESET)
     {
         g_count++;
-        task_tic = 1;
         timing_task();
+        task_time(task_cnt++);
         TIM_ClearITPendingBit(TIM2, TIM_IT_Update);
     }
 }
 
 /*
-计数频率 = 时钟源频率 / (预分频值 + 1)
-定时时间 = 自动重载计数值 / 计数频率
+锟斤拷锟斤拷频锟斤拷 = 时锟斤拷源频锟斤拷 / (预锟斤拷频值 + 1)
+锟斤拷时时锟斤拷 = 锟皆讹拷锟斤拷锟截硷拷锟斤拷值 / 锟斤拷锟斤拷频锟斤拷
 */
 void TIM4_Configuration(void) // 10us
 {
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM4, ENABLE);
 
     TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
-    TIM_TimeBaseStructure.TIM_Prescaler = 84 - 1; // 根据需要调整分频系数
+    TIM_TimeBaseStructure.TIM_Prescaler = 84 - 1; // 锟斤拷锟斤拷锟斤拷要锟斤拷锟斤拷锟斤拷频系锟斤拷
     TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
-    TIM_TimeBaseStructure.TIM_Period = 10 - 1; // 根据需要调整计数周期
+    TIM_TimeBaseStructure.TIM_Period = 10 - 1; // 锟斤拷锟斤拷锟斤拷要锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷
     TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV1;
     TIM_TimeBaseStructure.TIM_RepetitionCounter = 0;
 
