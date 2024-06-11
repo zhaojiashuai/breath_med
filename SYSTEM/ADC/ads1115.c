@@ -1,53 +1,70 @@
 #include "ADS1115.h"
 
-
 u8 WriteIntBuf[10],WritepointBuf[10];
-
-void delay_iic(void)  //??4?????,??4.34us  
+void delay_iic(void)  
 {  
     delay_us(4);
 }  
 
+/**
+ * @brief 设置ADS1115的I2C SDA引脚状态
+ * 
+ * @param i 如果为0，将SDA引脚设置为输出模式；如果为非0，将SDA引脚设置为输入模式。
+ */
 void setADS1115_sda(u8 i)
 {
-    GPIO_InitTypeDef GPIO_InitStructure;
-
-    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOB, ENABLE); // ʹ��GPIOCʱ��
-
-    GPIO_InitStructure.GPIO_Pin =   GPIO_Pin_7 ; // LEDIO��
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;                                                  // ��ͨ���ģʽ
-    GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;                                                 // �������
-    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;                                             // 100MHz
-    GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;                                                   // ����
-
-	
-	if(i)
-	{
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;                                                  // ��ͨ���ģʽ
+    GPIO_InitTypeDef GPIO_InitStructure; // 定义一个GPIO初始化结构体
+    // 使能GPIOB的时钟
+    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOB, ENABLE); 
+    // 设置GPIO_InitStructure的GPIO_Pin为GPIOB的第7脚，即SDA引脚
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_7; 
+    // 根据参数i的值设置SDA引脚的模式
+    if(i)
+    {
+        // 如果i非0，设置为输入模式
+        GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN; 
+    }
+    else
+    {
+        // 如果i为0，设置为输出模式
+        GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT; 
+    }
+    // 设置为推挽输出类型
     GPIO_InitStructure.GPIO_OType = GPIO_OType_PP; 
-	}else
-	{
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;                                                  // ��ͨ���ģʽ
-    GPIO_InitStructure.GPIO_OType = GPIO_OType_PP; 
-	}
+    // 设置GPIOB的输出速度为100MHz
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz; 
+    // 设置上拉
+    GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP; 
+    // 根据GPIO_InitStructure的配置初始化GPIOB
     GPIO_Init(GPIOB, &GPIO_InitStructure);   
 }
 
+/**
+ * @brief 初始化ADS1115的I2C引脚
+ * 
+ * 这个函数用于配置STM32的GPIO引脚，以作为I2C通信的SCL和SDA线。
+ */
 void ADS1115_init(void)
 {
-    GPIO_InitTypeDef GPIO_InitStructure;
-
-    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOB, ENABLE); // ʹ��GPIOCʱ��
-
-    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_6 | GPIO_Pin_7 ; // LEDIO��
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;                                                  // ��ͨ���ģʽ
-    GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;                                                 // �������
-    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;                                             // 100MHz
-    GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;                                                   // ����
-    GPIO_Init(GPIOB, &GPIO_InitStructure);                                                         // ��ʼ��GPIO
-
+    GPIO_InitTypeDef GPIO_InitStructure; // 定义一个GPIO初始化结构体
+    // 使能GPIOB的时钟，因为SCL和SDA引脚位于GPIOB组
+    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOB, ENABLE); 
+    // 设置GPIO_InitStructure的GPIO_Pin为GPIOB的第6脚和第7脚，即SCL和SDA引脚
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_6 | GPIO_Pin_7; 
+    // 设置GPIO_InitStructure的GPIO_Mode为输出模式
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT; 
+    // 设置GPIO_InitStructure的GPIO_OType为推挽输出类型
+    GPIO_InitStructure.GPIO_OType = GPIO_OType_PP; 
+    // 设置GPIOB的输出速度为100MHz
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz; 
+    // 设置GPIO_InitStructure的GPIO_PuPd为上拉
+    GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP; 
+    // 根据GPIO_InitStructure的配置初始化GPIOB
+    GPIO_Init(GPIOB, &GPIO_InitStructure); 
+    // 设置GPIOB的第6脚和第7脚为高电平，确保I2C总线初始状态为空闲
     GPIO_SetBits(GPIOB, GPIO_Pin_6 | GPIO_Pin_7);
 }
+
 
 void Init__ADS1115(void)
 {
@@ -63,8 +80,8 @@ void Start_1115(void)
     sda_H;  
     delay_iic();   
     scl_H ;  
-    delay_iic();      //sda?scl???????4.7us??    
-    sda_L;          //???  
+    delay_iic();        
+    sda_L;          
     delay_iic();
     scl_L;  
     delay_iic(); 
@@ -73,12 +90,11 @@ void Start_1115(void)
 void Stop_1115(void)
 {
     sda_L;
-    delay_iic();  //????  
+    delay_iic();  
     scl_H ;  
-    delay_iic();      //???????????4us??  
-    sda_H;          //scl?????,sda??????  
-    delay_iic();      //sda??4.7us??,4.34??????????4.7us  
-                        //?:??scl?sda??1 
+    delay_iic();       
+    sda_H;          
+    delay_iic();      
 }
 
 void WriteByte_1115(u8 WriteData)
@@ -88,10 +104,10 @@ void WriteByte_1115(u8 WriteData)
     u8 temp=WriteData;  
     for(i=0;i<8;i++)  
     {  
-        b=temp>>(7-i);//temp=temp<<1;   //????????PSW????CY?? 
+        b=temp>>(7-i);
         b=b&0x01;  
-        scl_L;           //??  
-        delay_iic();            //????   
+        scl_L;           
+        delay_iic();             
         if(b)
         {
           sda_H; 
@@ -100,31 +116,29 @@ void WriteByte_1115(u8 WriteData)
           sda_L; 
         }
         delay_iic();  
-        scl_H;            //????????,ic?????????  
+        scl_H;             
         delay_iic();          
     }  
   
-    scl_L;              //????scl=1;sda=1??????,?????  
+    scl_L;              
     delay_iic();                  
-    sda_H;              //????,??????????  
+    sda_H;               
     delay_iic();  
 }
 
 u8 ReadByte_1115(void)
 {
     u8 i,temp;  
-    scl_L;               //?????  
+    scl_L;                
     delay_iic();  
-    sda_H;             //????  
+    sda_H;             
     delay_iic(); 
     sda_in;
     for(i=0;i<8;i++)  
     {  
         delay_iic();       
-        scl_H;         //mcu?????  
-        delay_iic();      //scl?????,ic?????1?????sda?  
-                            //????????4.34us?,??????mcu?sda?  
-        //temp=(temp<<1)|sda; //??????temp?  
+        scl_H;         
+        delay_iic();      
         temp=(temp<<1);
         if(sda_st)
         {
@@ -142,11 +156,11 @@ void ReceiveAck_1115(void)
     sda_in;
     scl_H;  
     delay_iic();
-	  scl_L;           //????,??1??????   
+	  scl_L;           
     delay_iic(); 
    while((sda_st==1)&&(i<255))
    	  i++;
-    scl_L;           //????,??1??????   
+    scl_L;            
     delay_iic(); 
     sda_out;
 }
@@ -185,7 +199,7 @@ void Acknowledge_1115(void)
 		WriteIntBuf[0] = 0x90;
     WriteIntBuf[1] = 0x01;
 		WriteIntBuf[2] = chnel;
-		WriteIntBuf[3] = 0xe3;//0X83,0XE3,0X82
+		WriteIntBuf[3] = 0xe3;
 		
 		Start_1115();
 		
@@ -203,21 +217,18 @@ void Acknowledge_1115(void)
 *******************************************************************************/
 static void PointRegister (void)
 {
-	u8 i;
-	WritepointBuf[0] = 0x90; //90
-	WritepointBuf[1] = 0x00; //00
-	
+  u8 i;
+  WritepointBuf[0] = 0x90; //90
+  WritepointBuf[1] = 0x00; //00
   Start_1115();
   for(i=0;i<2;i++)
   {
     WriteByte_1115(WritepointBuf[i]);
     ReceiveAck_1115();
   }
-		Stop_1115();
+    Stop_1115();
 }
-
 u8 ReadBuffer[10];
-
 /*******************************************************************************
 * ??ADS1115?16???
 *******************************************************************************/
@@ -230,11 +241,11 @@ static u16 ReadData (u8 chnnal1)
 		ReceiveAck_1115();
 		ReadBuffer[0] = ReadByte_1115();
 		ReceiveAck_1115();
-		ReadBuffer[1] = ReadByte_1115(); ////??????
+		ReadBuffer[1] = ReadByte_1115(); 
 		Acknowledge_1115();
 		Stop_1115();
 		data = (ReadBuffer[0]<<8)|ReadBuffer[1];
-		if(data>0x7fff)// fu ya 
+		if(data>0x7fff)
 		data = ~data+1;	
 		return data;
 }
@@ -245,16 +256,15 @@ static u16 ReadData (u8 chnnal1)
 *******************************************************************************/
 u16 Get_ATOD (u8 channel)
 {
-	static u8 chn;
-	static u32 data_get;
-   chn = channel;
-
-Confige1115(channel); ////??ADS1115????
-delay_ms(1);
-PointRegister();
-delay_ms(1);
-data_get = ReadData(chn);
-delay_ms(1);	
-return data_get;
+  static u8 chn;
+  static u32 data_get;
+  chn = channel;
+  Confige1115(channel); ////??ADS1115????
+  delay_ms(1);
+  PointRegister();
+  delay_ms(1);
+  data_get = ReadData(chn);
+  delay_ms(1);	
+  return data_get;
 }
 

@@ -4,12 +4,11 @@ uint16_t AdcValues[10];
 
 void bsp_InitAdcDMA(void)
 {
-    // 配置DMA传输
     DMA_InitTypeDef DMA_InitStruct;
     RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_DMA2, ENABLE);
     DMA_InitStruct.DMA_PeripheralBaseAddr = (uint32_t) & (ADC1->DR);
     DMA_InitStruct.DMA_Memory0BaseAddr = (uint32_t)AdcValues;
-    DMA_InitStruct.DMA_DIR = DMA_DIR_PeripheralToMemory; // 确定方向很重要
+    DMA_InitStruct.DMA_DIR = DMA_DIR_PeripheralToMemory; 
     DMA_InitStruct.DMA_BufferSize = 4;
     DMA_InitStruct.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
     DMA_InitStruct.DMA_MemoryInc = DMA_MemoryInc_Enable;

@@ -374,16 +374,17 @@ void write_flash(void)
     }
 }
 
+double adc_bu[3];
+void adc_Cal(void)
+{
+    adc_bu[0] = (double)Get_ATOD(0)/65535*5.0;
+    adc_bu[1] = (double)Get_ATOD(1)/65535*5.0;
+    adc_bu[2] = (double)Get_ATOD(2)/65535*5.0;
+}
+
 void print_task(void)
 {
     // printf("adc1:%d,adc2:%d\r\n", get_adc_value(0), get_adc_value(1));
     // printf("breath_pre:%d,berath_value:%d\r\n", sensor.breath_pre, sensor.berath_value);
-}
-
-uint16_t adc_bu[3];
-void adc_Cal(void)
-{
-    adc_bu[0] = Get_ATOD(0);
-    adc_bu[1] = Get_ATOD(1);
-    adc_bu[2] = Get_ATOD(2);
+    printf("adc1:%.2f,adc2:%.2f,adc3:%.2f\r\n", adc_bu[0], adc_bu[1],adc_bu[2]);
 }

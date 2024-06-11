@@ -1,43 +1,55 @@
 #include "EXIT.h"
 
-// Íâ²¿ÖĞ¶Ï0·şÎñ³ÌĞò
 void EXTI0_IRQHandler(void)
 {
-    // CODE
-    EXTI_ClearITPendingBit(EXTI_Line0); // Çå³ıLINE0ÉÏµÄÖĞ¶Ï±êÖ¾Î»
+    EXTI_ClearITPendingBit(EXTI_Line0); 
 }
 
-// Íâ²¿ÖĞ¶Ï³õÊ¼»¯³ÌĞò
-// ³õÊ¼»¯PE2~4,PA0ÎªÖĞ¶ÏÊäÈë.
+
+/**
+ * @brief å¤–éƒ¨ä¸­æ–­åˆå§‹åŒ–å‡½æ•°
+ * 
+ * è¿™ä¸ªå‡½æ•°ç”¨äºé…ç½®STM32çš„å¤–éƒ¨ä¸­æ–­EXTIï¼Œä»¥åŠç›¸å…³çš„NVICï¼ˆåµŒå¥—å‘é‡ä¸­æ–­æ§åˆ¶å™¨ï¼‰å’ŒGPIOã€‚
+ * å®ƒé…ç½®äº†ä¸€ä¸ªGPIOå¼•è„šä½œä¸ºå¤–éƒ¨ä¸­æ–­çš„è¾“å…¥ï¼Œå¹¶è®¾ç½®äº†ä¸­æ–­çš„è§¦å‘æ¡ä»¶ã€ä¼˜å…ˆçº§ç­‰ã€‚
+ * 
+ * @param void
+ * @return void
+ */
 void EXTIX_Init(void)
 {
-    NVIC_InitTypeDef NVIC_InitStructure;
-    EXTI_InitTypeDef EXTI_InitStructure;
+    NVIC_InitTypeDef NVIC_InitStructure; // NVICåˆå§‹åŒ–ç»“æ„ä½“
+    EXTI_InitTypeDef EXTI_InitStructure; // EXTIåˆå§‹åŒ–ç»“æ„ä½“
 
-    GPIO_InitTypeDef GPIO_InitStructure;
+    GPIO_InitTypeDef GPIO_InitStructure; // GPIOåˆå§‹åŒ–ç»“æ„ä½“
 
-    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOB, ENABLE); // Ê¹ÄÜGPIOA,GPIOEÊ±ÖÓ
+    // ä½¿èƒ½GPIOBæ—¶é’Ÿ
+    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOB, ENABLE); 
 
-    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0;          // PB0 ¶ÔÓ¦Òı½Å
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;       // ÆÕÍ¨ÊäÈëÄ£Ê½
-    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz; // 100M
-    GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_DOWN;     // ÏÂÀ­
-    GPIO_Init(GPIOB, &GPIO_InitStructure);             // ³õÊ¼»¯GPIOB0
+    // é…ç½®GPIOB0å¼•è„šä¸ºè¾“å…¥æ¨¡å¼ï¼Œä¸‹æ‹‰ï¼Œé€Ÿåº¦ä¸º100MHz
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0;         
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;      
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz; 
+    GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_DOWN;     
+    GPIO_Init(GPIOB, &GPIO_InitStructure);             
 
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG, ENABLE); // Ê¹ÄÜSYSCFGÊ±ÖÓ
+    // ä½¿èƒ½SYSCFGæ—¶é’Ÿï¼Œç”¨äºé…ç½®EXTIçº¿
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG, ENABLE); 
 
-    SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOA, EXTI_PinSource0); // PA0 Á¬½Óµ½ÖĞ¶ÏÏß0
+    // å°†GPIOB0è¿æ¥åˆ°EXTIçº¿0
+    SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOB, EXTI_PinSource0); 
 
-    /* ÅäÖÃEXTI_Line0 */
-    EXTI_InitStructure.EXTI_Line = EXTI_Line0;             // LINE0
-    EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;    // ÖĞ¶ÏÊÂ¼ş
-    EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising; // ÉÏÉıÑØ´¥·¢
-    EXTI_InitStructure.EXTI_LineCmd = ENABLE;              // Ê¹ÄÜLINE0
-    EXTI_Init(&EXTI_InitStructure);                        // ÅäÖÃ
+    // é…ç½®EXTIçº¿0ä¸ºä¸­æ–­æ¨¡å¼ï¼Œä¸Šå‡æ²¿è§¦å‘
+    EXTI_InitStructure.EXTI_Line = EXTI_Line0;             
+    EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;    
+    EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising; 
+    EXTI_InitStructure.EXTI_LineCmd = ENABLE;              
+    EXTI_Init(&EXTI_InitStructure);                        
 
-    NVIC_InitStructure.NVIC_IRQChannel = EXTI0_IRQn;             // Íâ²¿ÖĞ¶Ï0
-    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0x03; // ÇÀÕ¼ÓÅÏÈ¼¶3
-    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x02;        // ×ÓÓÅÏÈ¼¶2
-    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;              // Ê¹ÄÜÍâ²¿ÖĞ¶ÏÍ¨µÀ
-    NVIC_Init(&NVIC_InitStructure);                              // ÅäÖÃ
+    // é…ç½®NVICï¼Œè®¾ç½®EXTI0ä¸­æ–­çš„ä¼˜å…ˆçº§ï¼Œå¹¶ä½¿èƒ½ä¸­æ–­
+    NVIC_InitStructure.NVIC_IRQChannel = EXTI0_IRQn;             
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0x03; 
+    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x02;        
+    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;              
+    NVIC_Init(&NVIC_InitStructure);                              
 }
+
