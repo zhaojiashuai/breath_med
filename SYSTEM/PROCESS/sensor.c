@@ -386,5 +386,5 @@ void print_task(void)
 {
     // printf("adc1:%d,adc2:%d\r\n", get_adc_value(0), get_adc_value(1));
     // printf("breath_pre:%d,berath_value:%d\r\n", sensor.breath_pre, sensor.berath_value);
-    printf("adc1:%.2f,adc2:%.2f,adc3:%.2f\r\n", adc_bu[0], adc_bu[1],adc_bu[2]);
+    // printf("adc1:%.2f,adc2:%.2f,adc3:%.2f\r\n", adc_bu[0], adc_bu[1],adc_bu[2]);
 }

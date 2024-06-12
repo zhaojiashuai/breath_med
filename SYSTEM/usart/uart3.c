@@ -4,10 +4,10 @@ oxygen_t output = {0};
 
 void uart3_init(u32 bound)
 {
-    // Ê¹ÄÜUSART3Ê±ÖÓ
+    // Ê¹ï¿½ï¿½USART3Ê±ï¿½ï¿½
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART3, ENABLE);
 
-    // ÅäÖÃ´®¿ÚÒý½Å
+    // ï¿½ï¿½ï¿½Ã´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     GPIO_InitTypeDef GPIO_InitStruct;
     RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOB, ENABLE);
     GPIO_InitStruct.GPIO_Pin = GPIO_Pin_10 | GPIO_Pin_11;
@@ -17,11 +17,11 @@ void uart3_init(u32 bound)
     GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_NOPULL;
     GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-    // ½«Òý½ÅÉèÖÃÎª´®¿Ú¹¦ÄÜ
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Îªï¿½ï¿½ï¿½Ú¹ï¿½ï¿½ï¿½
     GPIO_PinAFConfig(GPIOB, GPIO_PinSource10, GPIO_AF_USART3);
     GPIO_PinAFConfig(GPIOB, GPIO_PinSource11, GPIO_AF_USART3);
 
-    // ÅäÖÃUSART3²ÎÊý
+    // ï¿½ï¿½ï¿½ï¿½USART3ï¿½ï¿½ï¿½ï¿½
     USART_InitTypeDef USART_InitStruct;
     USART_InitStruct.USART_BaudRate = bound;
     USART_InitStruct.USART_WordLength = USART_WordLength_8b;
@@ -31,13 +31,13 @@ void uart3_init(u32 bound)
     USART_InitStruct.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
     USART_Init(USART3, &USART_InitStruct);
 
-    // Ê¹ÄÜ´®¿Ú½ÓÊÕÖÐ¶Ï
+    // Ê¹ï¿½Ü´ï¿½ï¿½Ú½ï¿½ï¿½ï¿½ï¿½Ð¶ï¿½
     USART_ITConfig(USART3, USART_IT_RXNE, ENABLE);
 
-    // Ê¹ÄÜ´®¿Ú
+    // Ê¹ï¿½Ü´ï¿½ï¿½ï¿½
     USART_Cmd(USART3, ENABLE);
 
-    // ÅäÖÃ´®¿ÚÖÐ¶ÏÓÅÏÈ¼¶
+    // ï¿½ï¿½ï¿½Ã´ï¿½ï¿½ï¿½ï¿½Ð¶ï¿½ï¿½ï¿½ï¿½È¼ï¿½
     NVIC_InitTypeDef NVIC_InitStructure;
     NVIC_InitStructure.NVIC_IRQChannel = USART3_IRQn;
     NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 2;
@@ -46,15 +46,15 @@ void uart3_init(u32 bound)
     NVIC_Init(&NVIC_InitStructure);    
 }
 
-// buf:·¢ËÍÇøÊ×µØÖ·
-// len:·¢ËÍµÄ×Ö½ÚÊý(ÎªÁËºÍ±¾´úÂëµÄ½ÓÊÕÆ¥Åä,ÕâÀï½¨Òé²»Òª³¬¹ý64¸ö×Ö½Ú)
+// buf:ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×µï¿½Ö·
+// len:ï¿½ï¿½ï¿½Íµï¿½ï¿½Ö½ï¿½ï¿½ï¿½(Îªï¿½ËºÍ±ï¿½ï¿½ï¿½ï¿½ï¿½Ä½ï¿½ï¿½ï¿½Æ¥ï¿½ï¿½,ï¿½ï¿½ï¿½ï½¨ï¿½é²»Òªï¿½ï¿½ï¿½ï¿½64ï¿½ï¿½ï¿½Ö½ï¿½)
 void uart3_printf(u8 *buf, u8 len)
 {
     u16 t;
-    for (t = 0; t < len; t++) // Ñ­»··¢ËÍÊý¾Ý
+    for (t = 0; t < len; t++) // Ñ­ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     {
         while (USART_GetFlagStatus(USART3, USART_FLAG_TC) == RESET)
-            ; // Ñ­»··¢ËÍ,Ö±µ½·¢ËÍÍê±Ï
+            ; // Ñ­ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½,Ö±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
         USART_SendData(USART3, buf[t]);
     }
     while (USART_GetFlagStatus(USART3, USART_FLAG_TC) == RESET)
@@ -65,10 +65,10 @@ void USART3_IRQHandler(void)
 {
     static u8 cnt = 0;
     static u8 uart3[100] = {0};
-    if (USART_GetITStatus(USART3, USART_IT_RXNE) != RESET) // ½ÓÊÕµ½Êý¾Ý
+    if (USART_GetITStatus(USART3, USART_IT_RXNE) != RESET) // ï¿½ï¿½ï¿½Õµï¿½ï¿½ï¿½ï¿½ï¿½
     {
-        USART_ClearITPendingBit(USART3, USART_IT_RXNE); // Çå³ýÖÐ¶Ï±êÖ¾Î»
-        uart3[cnt++] = USART_ReceiveData(USART3);       // ¶ÁÈ¡½ÓÊÕµ½µÄÊý¾Ý
+        USART_ClearITPendingBit(USART3, USART_IT_RXNE); // ï¿½ï¿½ï¿½ï¿½Ð¶Ï±ï¿½Ö¾Î»
+        uart3[cnt++] = USART_ReceiveData(USART3);       // ï¿½ï¿½È¡ï¿½ï¿½ï¿½Õµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
         if (uart3[0] != 0x16||cnt>90)
         {
             cnt = 0;
@@ -77,9 +77,10 @@ void USART3_IRQHandler(void)
         {
             if (cnt >= 11)
             {
-                output.oxygen = uart3[3] * 256 + uart3[4];
-                output.flow = uart3[5] * 256 + uart3[6];
-                output.temp = uart3[7] * 256 + uart3[8];
+                uart3_printf(uart3,cnt);
+                output.oxygen = (uart3[3]<<8) + uart3[4];
+                output.flow = (uart3[5]<<8)+ uart3[6];
+                output.temp = (uart3[7]<<8) + uart3[8];
                 cnt = 0;
             }
         }
