@@ -12,4 +12,5 @@ void timing_task(void);
 void print_task(void);
 void write_flash(void);
 void adc_Cal(void);
+void display_trans(void);
 #endif

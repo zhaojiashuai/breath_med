@@ -225,8 +225,9 @@ void display_trans(void)
 
 void datatrans_deal(void)
 {
+    static uint16_t i = 0;
+    modbus_dis[mixed_ki] = i++;
     compressor_set(modbus_dis[Compressor_setspeed], 0x00, 0x00, 0x00);
-    display_trans();
 }
 
 void set_sensor_value(void)

@@ -17,11 +17,12 @@ int main(void)
 	uart_init(9600);
 	uart2_init(9600);
 	uart3_init(9600);
-	uart4_init(9600);
+	uart4_init(115200);
 	uart5_init(9600);
 	data_init(); // ��ʼ��������ʾ
 	while (1)
 	{
 		task_run();
+		display_trans();
 	}
 }
