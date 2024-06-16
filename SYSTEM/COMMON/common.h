@@ -66,77 +66,62 @@ typedef struct device // ѹ������Ϣ
     uint16_t rpm;
 } compressor_t, *compressor_ptr;
 
-typedef struct display
-{
-    int8_t  breath_stat;
-    int16_t berath_value;     // ��������
-    int16_t last_berath_value;     // ��һ�κ�������
-    uint16_t breath_pre;     // ����ѹ��   
-    uint16_t last_breath_pre;     // ��һ�κ���ѹ��    
-    uint16_t breath_frq;        // ����Ƶ��
-    uint16_t breath_rat;        // ������
-    int32_t breath_count;       //������������
-    float k_pre;//б��
-    float b_pre;//ƫ��
-    float k_valu;//б��
-    float b_valu;//ƫ��    
-} display_t, *display_ptr;
-
 typedef enum 
 {
-    concentrator_oxygen = 0,//����������Ũ��------------ѹ��������ʹ��
-    concentrator_flow,//����������
-    Compressor_speed,//ѹ�����ٶ�
-    Compressor_err,//ѹ����������
-    Compressor_setspeed,//ѹ�����趨�ٶ�
-    mixed_oxygen,//����Ũ��
-    mixed_setoxygen,//�����趨Ũ��---------����������ʹ��
-    breath_pressure,//����ѹ��-----------ѹ���������ɼ�����
-    breath_offset,//����ѹ��ƫ��-----------ѹ���������ɼ�����
-    set_xi_pre,//�趨����ѹ��
-    set_hu_pre,//�趨����ѹ��
-    set_pre,//�趨����ѹ��
-    xiqivalue_1,//������1
-    xiqivalue_2,//������2
-    xiqivalue_3,//������3
-    xiqivalue_4,//������4
-    xiqivalue_5,//������5
-    huqivalue_1,//������1
-    huqivalue_2,//������2
-    huqivalue_3,//������3
-    huqivalue_4,//������4
-    huqivalue_5,//������5
-    huxi_flow,//��������
-    huxi_offset,//��������ƫ��
-    chaoqi_value,//������----------����������
-    huxi_freq,//����Ƶ��
-    huxi_ratio,//������
-    debug_mode,//����ģʽ
-    p_value_out,//���������
-    fan_out,//������
-    relay_plus,//����1ʱ��
-    relay_cycle,//����2ʱ��
-    Compressor_kp,//������PID����
-    Compressor_ki,//������PID����
-    Compressor_kd,//������PID����
-    mixed_kp,//����PID����
-    mixed_ki,//����PID����
-    mixed_kd,//����PID����
-    pressure_kp,//ѹ��PID����
-    pressure_ki,//ѹ��PID����
-    pressure_kd,//ѹ��PID����
-    breath_stat,//����ģʽ
-    cal_stat,//�ɼ���״̬
-    pre_x1,//ѹ���궨X1ֵ--�洢״̬��ʼֵ
-    pre_y1,//ѹ���궨Y1ֵ
-    pre_x2,//ѹ���궨X2ֵ
-    pre_y2,//ѹ���궨Y1ֵ
-    flow_x1,//�����궨X1ֵ
-    flow_y1,//�����궨Y1ֵ
-    flow_x2,//�����궨X2ֵ
-    flow_y2,//�����궨Y2ֵ 
+    concentrator_oxygen,
+    concentrator_flow,
+    Compressor_speed,
+    Compressor_err,
+    Compressor_setspeed,
+    mixed_oxygen,
+    mixed_setoxygen,
+    breath_pressure,
+    breath_offset,
+    set_xi_pre,
+    set_hu_pre,
+    set_pre,
+    xiqivalue_1,
+    xiqivalue_2,
+    xiqivalue_3,
+    xiqivalue_4,
+    xiqivalue_5,
+    huqivalue_1,
+    huqivalue_2,
+    huqivalue_3,
+    huqivalue_4,
+    huqivalue_5,
+    huxi_flow,
+    huxi_offset,
+    chaoqi_value,
+    huxi_freq,
+    huxi_ratio,
+    debug_mode,
+    p_value_out,
+    fan_out,
+    relay_plus,
+    relay_cycle,
+    Compressor_kp,
+    Compressor_ki,
+    Compressor_kd,
+    mixed_kp,
+    mixed_ki,
+    mixed_kd,
+    pressure_kp,
+    pressure_ki,
+    pressure_kd,
+    breath_stat,
+    cal_stat,
+    pre_x1,
+    pre_y1,
+    pre_x2,
+    pre_y2,
+    flow_x1,
+    flow_y1,
+    flow_x2,
+    flow_y2,
     all_num,   
-}modbus;
+} modbus;
+
 
 
 int clampFilter(int value, int minValue, int maxValue);

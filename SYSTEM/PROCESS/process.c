@@ -4,6 +4,25 @@ float Flow,FlowLast,FlowD,FlowDLast,FlowD2,XiSum[10],HuSum[10],XiP,HuP;
 
 int16_t State,StateLast,XiTryTime[10],XiTime[10],HuTime[10],XiTik,HuTik,StateTime,StateTimeLast,Hz,Set;
 
+/*转化数据传递*/
+void data_send(void)
+{
+    Hz = 20;//采集和计算频率
+    modbus_dis[set_xi_pre] = Set;//压力设定
+    Flow = sensor.berath_value;//流量数值赋值
+    modbus_dis[xiqivalue_1] = XiSum[0];
+    modbus_dis[xiqivalue_2] = XiSum[1];
+    modbus_dis[xiqivalue_3] = XiSum[2];
+    modbus_dis[xiqivalue_4] = XiSum[3];
+    modbus_dis[xiqivalue_5] = XiSum[4];
+
+    modbus_dis[huqivalue_1] = HuSum[0];
+    modbus_dis[huqivalue_2] = HuSum[1];
+    modbus_dis[huqivalue_3] = HuSum[2];
+    modbus_dis[huqivalue_4] = HuSum[3];
+    modbus_dis[huqivalue_5] = HuSum[4];
+}
+
 /*1000ms调度周期*/
 void soft_process(void)
 {
@@ -57,27 +76,17 @@ void soft_process(void)
 
     FlowLast=Flow; FlowDLast=FlowD;    
 }
-/*
-1000MS
-F :L/MIN
-P :CMH20
-*/
-void adc_trans(void)
-{
-    double a1,a2;//电压值
-    double F,P;
-    F = 2.74273849138829*pow(a1,7)-50.1823050124469*pow(a1,6)+373.525387950575*pow(a1,5)-1453.24303259627*pow(a1,4)+3168.88268278098*pow(a1,3)-3871.08286011955*pow(a1,2)+2549.63479716526*a1-827.709782903377;
-    if(F>150) F = 150;
-    P = -0.143224203722728*a2*a2*a2+0.809567865321594*a2*a2+8091152612841201*a2-5.13046589156455;
-    if(P<0) P=0;
-    if(P>20) P=20;
-}
 
+/*20ms调用一次*/
 void breath_value_Cal(void)
 {
     double ChaoQi,HuXiHz,XiHuBi;
     ChaoQi=XiSum[(XiTik-2)%5];
     HuXiHz=60/(XiTime[(XiTik-2)%5]/Hz+HuTime[(XiTik-2)%5]/Hz);
     XiHuBi=XiTime[(XiTik-2)%5]/HuTime[(XiTik-2)%5];
+
+    sensor.breath_chaoqi = (uint16_t)ChaoQi;
+    sensor.breath_frq = (uint16_t)HuXiHz;
+    sensor.breath_rat = (uint16_t)XiHuBi;
 }
 

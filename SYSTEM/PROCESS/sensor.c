@@ -16,7 +16,7 @@ void zhjw_test(void)
     machine.err_code = rand() % 255;
     output.oxygen = rand() % 1000 / 10;
 }
-/*�����Զ��궨*/
+/*线性方程线性转化*/
 void liner_cal(void)
 {
     float f, f1;
@@ -43,46 +43,40 @@ void liner_cal(void)
     }
 }
 
+double adc_bu[3];
+void adc_Cal(void)
+{
+    adc_bu[0] = (double)Get_ATOD(0);
+    adc_bu[1] = (double)Get_ATOD(1);
+    adc_bu[2] = (double)Get_ATOD(2);
+}
+
+/*
+F :L/MIN
+P :CMH20
+*/
 void get_sensor_value(void)
 {
     static filter_t breath_pre = {0}, berath_value = {0};
     double f = 0;
     liner_cal();
-    sensor.last_breath_pre = sensor.breath_pre;
-    f = (double)get_adc_value(0);
+    f = (double)adc_bu[0];
     f = sliding_average_filter(&breath_pre, f);
     f = f * sensor.k_pre + sensor.b_pre;
-    if (f > 5000)
-    {
-        f = 5000;
-    }
-    else if (f <= 0)
-    {
-        f = 0;
-    }
-    sensor.breath_pre = (uint16_t)(f + 1000 - modbus_dis[breath_offset]); // ����ƫ�����ϵͳ�ȶ���
+    // f = -0.143224203722728*f*f*f+0.809567865321594*f*f+8091152612841201*f-5.13046589156455;
+    // if(f<0) P=0;
+    // if(f>20) P=20;
+    sensor.breath_pre = (uint16_t)(f + 1000 - modbus_dis[breath_offset]); 
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////
-    sensor.last_berath_value = sensor.berath_value;
-    f = (double)get_adc_value(1);
+    f = (double)adc_bu[1];
     f = sliding_average_filter(&berath_value, f);
     f = f * sensor.k_valu + sensor.b_valu;
-    sensor.berath_value = (int16_t)(f + 1000 - modbus_dis[huxi_offset]); // ����ƫ�����ϵͳ�ȶ���
-    // zhjw_test();
-    if (abs(sensor.berath_value) < 3) // ��Сϵͳ�ȶ����
-    {
-        sensor.breath_stat = 0;
-    }
-    else if (sensor.berath_value > 0)
-    {
-        sensor.breath_stat = 1;
-    }
-    else if (sensor.berath_value < 0)
-    {
-        sensor.breath_stat = -1;
-    }
+    // f = 2.74273849138829*pow(f,7)-50.1823050124469*pow(f,6)+373.525387950575*pow(f,5)-1453.24303259627*pow(f,4)+3168.88268278098*pow(f,3)-3871.08286011955*pow(f,2)+2549.63479716526*f-827.709782903377;
+    // if(f>150) f = 150;
+    sensor.berath_value = (int16_t)(f + 1000 - modbus_dis[huxi_offset]); 
 }
-/*��������߼�*/
+/*3205线序触发机制*/
 void valve_control(void)
 {
     uint16_t temp = 0;
@@ -92,13 +86,13 @@ void valve_control(void)
     {
         if (flag == 0)
         {
-            TEST_IO1 = 0;
-            TEST_IO2 = 1;
+            TEST_IO1 = 1;
+            TEST_IO2 = 0;
         }
         else
         {
-            TEST_IO1 = 1;
-            TEST_IO2 = 0;
+            TEST_IO1 = 0;
+            TEST_IO2 = 1;
         }
         last_flag = flag;
     }
@@ -122,86 +116,11 @@ void valve_control(void)
     }
 }
 
-/*���ڻ�ȡ��������*/
-void get_breathcount(void)
-{
-    static int8_t last_stat = 0;
-    if (last_stat != sensor.breath_stat && sensor.breath_stat != 0)
-    {
-        sensor.breath_count = 0;
-        last_stat = sensor.breath_stat;
-    }
-    if (sensor.breath_stat != 0) // ���ݺ���״̬��ȡ���������ۼ�ֵ
-        sensor.breath_count += sensor.berath_value / 1000;
-}
-/*��ʱ���������ۼƺʹ�������--1ms*/
+
+/*task--1ms*/
 void timing_task(void)
 {
     valve_control();
-    get_breathcount();
-}
-
-void get_breathvalue(uint32_t time)
-{
-    int32_t value = 0;
-    if (sensor.breath_stat == 1) // ����״̬�������������
-    {
-        value = -sensor.breath_count * time / 1000 / 60; // L/minת����ml 10��ϵ��
-        modbus_dis[huqivalue_5] = modbus_dis[huqivalue_4];
-        modbus_dis[huqivalue_4] = modbus_dis[huqivalue_3];
-        modbus_dis[huqivalue_3] = modbus_dis[huqivalue_2];
-        modbus_dis[huqivalue_2] = modbus_dis[huqivalue_1];
-        modbus_dis[huqivalue_1] = value;
-    }
-    else if (sensor.breath_stat == -1) // ����״̬������������
-    {
-        value = sensor.breath_count * time / 1000 / 60;
-        modbus_dis[xiqivalue_5] = modbus_dis[xiqivalue_4];
-        modbus_dis[xiqivalue_4] = modbus_dis[xiqivalue_3];
-        modbus_dis[xiqivalue_3] = modbus_dis[xiqivalue_2];
-        modbus_dis[xiqivalue_2] = modbus_dis[xiqivalue_1];
-        modbus_dis[xiqivalue_1] = value;
-    }
-}
-
-void breath_Deal(void)
-{
-    static int8_t last_stat = 0;
-    static uint16_t count = 0;
-    static uint32_t in_time, out_time;
-    if (last_stat != sensor.breath_stat)
-    {
-        last_stat = sensor.breath_stat;
-        if (sensor.breath_stat == 1)
-        {
-            out_time = g_count;
-            get_breathvalue(out_time);
-            g_count = 0;
-        }
-        else if (sensor.breath_stat == -1)
-        {
-            in_time = g_count;
-            get_breathvalue(in_time);
-            g_count = 0;
-        }
-    }
-    if (sensor.breath_stat == 0) // 7ms
-    {
-        if (count++ > 500) // 3.5sû�к�����״̬
-        {
-            count = 500;
-            in_time = 0;
-            out_time = 0;
-            sensor.berath_value = 0;
-        }
-    }
-    else
-    {
-        count = 0;
-    }
-
-    sensor.breath_frq = 60000 / (in_time + out_time); // ����Ƶ��
-    sensor.breath_rat = in_time * 100 / out_time;     // ������
 }
 
 void display_trans(void)
@@ -216,11 +135,11 @@ void display_trans(void)
     modbus_dis[huxi_freq] = sensor.breath_frq;
     modbus_dis[huxi_ratio] = sensor.breath_rat;
 
-    modbus_dis[huxi_flow] = sensor.berath_value; ////Ϊ�˽�������в��ܳ��ָ���������
+    modbus_dis[huxi_flow] = sensor.berath_value; 
     modbus_dis[breath_pressure] = sensor.breath_pre;
-    modbus_dis[chaoqi_value] = modbus_dis[xiqivalue_1];
+    modbus_dis[chaoqi_value] = sensor.breath_chaoqi;
     modbus_slave_parse(modbus_dis);
-    // ������֮��������趨��ָ���ṹ��֮��
+
 }
 
 void datatrans_deal(void)
@@ -233,36 +152,45 @@ void datatrans_deal(void)
 void set_sensor_value(void)
 {
     get_sensor_value();
-    breath_Deal();
-    TIM_SetCompare1(TIM3, modbus_dis[fan_out]);     // �趨��ˢ���
-    TIM_SetCompare2(TIM3, modbus_dis[p_value_out]); // �趨���������
+    TIM_SetCompare1(TIM3, modbus_dis[fan_out]);     
+    TIM_SetCompare2(TIM3, modbus_dis[p_value_out]); 
 }
 
-// PID���������º���������PID��
+
+/**
+ * PID控制算法函数
+ * @param pid 指向PID控制器的指针
+ * @param setpoint 设定值
+ * @param input 当前输入值
+ * @param Kp 比例增益
+ * @param Ki 积分增益
+ * @param Kd 微分增益
+ * @return 控制输出值
+ */
 uint16_t PID_cal(PIDController *pid, double setpoint, double input, uint16_t Kp, uint16_t Ki, uint16_t Kd)
 {
     uint16_t out;
-    // ����PID����
+    // 将整数增益转换为更精确的double类型，以便进行计算
     pid->Kp = (double)Kp / 10000;
     pid->Ki = (double)Ki / 10000;
     pid->Kd = (double)Kd / 10000;
-
-    // ����ƫ��
+    // 计算误差：设定值 - 当前输入值
     double error = setpoint - input;
-    pid->Timestamp = 1.0; // ������Ϊ1�����Ĵ˴����Ըı���������
-    // ����������΢����
+    // 假设采样时间为1，实际应用中可能需要根据系统时钟来调整
+    pid->Timestamp = 1.0;
+    // 计算积分项，防止积分饱和
     double integral = pid->Integral + pid->Ki * error * pid->Timestamp;
+    // 计算微分项
     double derivative = (error - pid->LastError) / pid->Timestamp;
-
-    // �����������
+    // 计算输出增量
     double outputIncrement = pid->Kp * error + integral + pid->Kd * derivative;
-
-    // ��������������ʷ
+    // 累加输出增量到历史输出
     pid->Output += outputIncrement;
+    // 更新误差为上一次的误差
     pid->LastError = error;
+    // 更新积分项
     pid->Integral = integral;
-
-    // �������
+    // 输出限幅，限制在0到500之间
     if (pid->Output > 500)
     {
         pid->Output = 500;
@@ -271,12 +199,11 @@ uint16_t PID_cal(PIDController *pid, double setpoint, double input, uint16_t Kp,
     {
         pid->Output = 0;
     }
-
-    // ��ȡ���յ����
+    // 将输出转换为uint16_t类型
     out = (uint16_t)pid->Output;
-
     return out;
 }
+
 
 void Compressor_closed(void)
 {
@@ -296,15 +223,13 @@ void mixed_closed(void)
 void pressure_closed(void)
 {
     static PIDController pressure = {0};
-    if (modbus_dis[breath_stat] == 1) // ��ѹģʽ---�䶤�̶����
+    if (modbus_dis[breath_stat] == 1) 
     {
         modbus_dis[fan_out] = modbus_dis[set_pre];
         FAN_BREAK_OFF;
     }
-    else // ����ģʽ
+    else 
     {
-        if (sensor.breath_stat == 1) // ������ʱ�����������ٶ�Ϊ����ʱ��������
-        {
             modbus_dis[fan_out] = PID_cal(&pressure, modbus_dis[set_xi_pre], sensor.breath_pre, modbus_dis[pressure_kp], modbus_dis[pressure_ki], modbus_dis[pressure_kd]);
             if (sensor.breath_pre <= modbus_dis[set_xi_pre])
             {
@@ -312,10 +237,9 @@ void pressure_closed(void)
             }
             else
             {
-                if (abs(sensor.breath_pre - modbus_dis[set_xi_pre]) > 10)
                     FAN_BREAK_ON;
             }
-        }
+        
     }
 
     if (modbus_dis[fan_out] > 500)
@@ -373,14 +297,6 @@ void write_flash(void)
         fmc_write(modbus_dev.write_flag, modbus_dis);
         modbus_dev.write_flag = 0;
     }
-}
-
-double adc_bu[3];
-void adc_Cal(void)
-{
-    adc_bu[0] = (double)Get_ATOD(0)/65535*5.0;
-    adc_bu[1] = (double)Get_ATOD(1)/65535*5.0;
-    adc_bu[2] = (double)Get_ATOD(2)/65535*5.0;
 }
 
 void print_task(void)

@@ -2,7 +2,7 @@
 #define __GPIO_H
 #include "common.h"
 
-// LED¶Ë¿Ú¶¨Òå
+// LEDï¿½Ë¿Ú¶ï¿½ï¿½ï¿½
 #define LED PCout(13) // LED0
 
 #define TEST_IO1 PCout(0)   //A
@@ -14,6 +14,6 @@
 #define FAN_BREAK_ON PCout(3) = 0  
 #define FAN_BREAK_OFF PCout(3) = 1 
 
-void gpio_init(void); // ³õÊ¼»¯
+void gpio_init(void); // ï¿½ï¿½Ê¼ï¿½ï¿½
 
 #endif

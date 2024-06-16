@@ -3,8 +3,9 @@
 
 #define     TASK_5MS        0X01
 #define     TASK_10MS        0X02
-#define     TASK_100MS        0X04
-#define     TASK_1000MS        0X08
+#define     TASK_20MS        0X04
+#define     TASK_100MS        0X08
+#define     TASK_1000MS        0X10
 
 uint32_t task_flag = 0;
 
@@ -18,6 +19,10 @@ void task_time(uint32_t cnt)
     {
         task_flag|=TASK_10MS;
     }  
+    if(cnt%20==0)
+    {
+        task_flag|=TASK_20MS;
+    }      
     if(cnt%100==0)
     {
         task_flag|=TASK_100MS;
@@ -41,6 +46,13 @@ void task_run(void)
         task_flag&=~TASK_10MS;
         adc_Cal();
     } 
+    if(task_flag&TASK_20MS)
+    {
+        task_flag&=~TASK_20MS;
+        soft_process();
+        breath_value_Cal();
+        data_send();
+    }     
     if(task_flag&TASK_100MS)
     {
         task_flag&=~TASK_100MS;
