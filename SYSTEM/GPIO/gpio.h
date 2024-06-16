@@ -11,9 +11,9 @@
 #define FAN_DIR_CW      PCout(2)  = 1
 #define FAN_DIR_CCW     PCout(2)  = 0
 
-#define FAN_BREAK_ON PCout(3) = 0  
-#define FAN_BREAK_OFF PCout(3) = 1 
+#define FAN_BREAK_ON PCout(3) = 1  
+#define FAN_BREAK_OFF PCout(3) = 0 
 
-void gpio_init(void); // ��ʼ��
+void gpio_init(void); 
 
 #endif

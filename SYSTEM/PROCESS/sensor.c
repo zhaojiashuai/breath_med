@@ -237,7 +237,7 @@ void pressure_closed(void)
             }
             else
             {
-                    FAN_BREAK_ON;
+                FAN_BREAK_ON;
             }
         
     }
@@ -251,7 +251,10 @@ void pressure_closed(void)
 void closed_loop_control(void)
 {
     if (modbus_dis[debug_mode])
+    {
+        FAN_BREAK_OFF;
         return;
+    }
     Compressor_closed();
     mixed_closed();
     pressure_closed();

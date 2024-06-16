@@ -5,7 +5,6 @@ int main(void)
 {
 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2); // 设置系统中断优先级分组为2
 	delay_init(168); // 初始化延时函数，参数168通常代表系统时钟为168MHz
-	delay_ms(2000); // 等待系统上电延时，等待屏幕通信
 	RCC_GetClocksFreq(&clk); // 获取系统时钟频率
 	gpio_init(); // 初始化通用输入输出（GPIO）
 	bsp_InitAdcDMA(); // 初始化模数转换器（ADC）的DMA功能
@@ -19,6 +18,7 @@ int main(void)
 	uart3_init(9600); // 初始化USART3，设置波特率为9600
 	uart4_init(115200); // 初始化USART4，设置波特率为115200
 	uart5_init(9600); // 初始化USART5，设置波特率为9600
+	delay_ms(2000); // 等待系统上电延时，等待屏幕通信
 	data_init(); // 初始化数据显示，可能用于LCD或OLED屏幕等
 
 	while (1)
