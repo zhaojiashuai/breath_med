@@ -65,7 +65,7 @@ void get_sensor_value(void)
     f = f * sensor.k_pre + sensor.b_pre;
     // f = -0.143224203722728*f*f*f+0.809567865321594*f*f+8091152612841201*f-5.13046589156455;
     // if(f<0) P=0;
-    // if(f>20) P=20;
+    // if(f>25) P=25;
     sensor.breath_pre = (uint16_t)(f + 1000 - modbus_dis[breath_offset]); 
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -152,6 +152,7 @@ void datatrans_deal(void)
 void set_sensor_value(void)
 {
     get_sensor_value();
+    modbus_dis[p_value_out] = 0;
     TIM_SetCompare1(TIM3, modbus_dis[fan_out]);     
     TIM_SetCompare2(TIM3, modbus_dis[p_value_out]); 
 }
