@@ -2,7 +2,7 @@
 
 float Flow,FlowLast,FlowD,FlowDLast,FlowD2,XiSum[10],HuSum[10],XiP,HuP;
 
-int16_t State,StateLast,XiTryTime[10],XiTime[10],HuTime[10],XiTik,HuTik,StateTime,StateTimeLast,Hz,Set;
+int16_t State,StateLast,XiTryTime[10],XiTime[10],HuTime[10],XiTik,HuTik,StateTime,StateTimeLast,Hz,Set,I_Trigger_Flow = 10,Trigger_flag,ItoE_Flow,Hang_off_flag;
 
 /*转化数据传递*/
 void data_send(void)
@@ -33,10 +33,28 @@ void soft_process(void)
     FlowD2=FlowD-FlowDLast;//流量 二次导数
 
 
-    if((State==0||State==-1)&&Flow>10) State=1; //进入吸气状态
-    if(State==1&&FlowD<0) State=2;  //吸气努力结束，保压状态
-    if(State==2&&StateTime>0.1*StateTimeLast) State=3; //吸气末期
-    if(Flow<0) State=-1; //呼气相
+    //状态切换(将原来的连续if语句改成switch判断语句)
+    switch (State)
+    {
+        case 0:
+            if(Flow>l_Trigger_Flow && Trigger_flag==1) //1-吸气努力状态
+            State=1;
+        break;
+        case 1:
+            if(Hang_off_flag==1) //2-保压状态
+            State=2;
+        break;
+        case 2:
+            if(StateTime>0.1*StateTimeLast) //3-吸气末期
+            State=3;
+        break;
+        case 3:
+            if(Flow<ltoE_Flow && Hang_off_flag==1) //0-呼相
+            State=0;
+        break;
+        default: 
+        break;
+    }
 
     if(State!=StateLast){  //若状态切换
         StateTimeLast=StateTime; //记录上一个状态持续时间

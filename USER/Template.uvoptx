@@ -230,6 +230,11 @@
           <WinNumber>1</WinNumber>
           <ItemText>adc_bu,0x0A</ItemText>
         </Ww>
+        <Ww>
+          <count>16</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>time_cnt,0x0A</ItemText>
+        </Ww>
       </WatchWindow1>
       <MemoryWindow1>
         <Mm>
