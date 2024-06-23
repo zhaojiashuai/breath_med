@@ -1,69 +1,68 @@
 #include "task.h"
 #include "common.h"
 
-#define     TASK_5MS        0X01
-#define     TASK_10MS        0X02
-#define     TASK_20MS        0X04
-#define     TASK_100MS        0X08
-#define     TASK_1000MS        0X10
-
-uint32_t task_flag = 0;
-
-void task_time(uint32_t cnt)
-{
-    if(cnt%5==0)
-    {
-        task_flag|=TASK_5MS;
-    }
-    if(cnt%10==0)
-    {
-        task_flag|=TASK_10MS;
-    }  
-    if(cnt%20==0)
-    {
-        task_flag|=TASK_20MS;
-    }      
-    if(cnt%100==0)
-    {
-        task_flag|=TASK_100MS;
-         
-    }   
-    if(cnt%1000==0)
-    {
-        task_flag|=TASK_1000MS;
-    }         
+// 任务执行函数
+void task_5ms(void) {
+    // 执行5ms任务
+    set_sensor_value();
 }
 
-void task_run(void)
-{
-    if(task_flag&TASK_5MS)
-    {
-        task_flag&=~TASK_5MS;
-        set_sensor_value();
-    }
-    if(task_flag&TASK_10MS)
-    {
-        task_flag&=~TASK_10MS;
-        adc_Cal();
-    } 
-    if(task_flag&TASK_20MS)
-    {
-        task_flag&=~TASK_20MS;
-        soft_process();
-        breath_value_Cal();
-        data_send();
-    }     
-    if(task_flag&TASK_100MS)
-    {
-        task_flag&=~TASK_100MS;
-        datatrans_deal();
-        closed_loop_control();          
-    }  
-    if(task_flag&TASK_1000MS)
-    {
-        task_flag&=~TASK_1000MS;
-        write_flash();        
-        LED = !LED;
-        print_task();         
-    }         
+void task_10ms(void) {
+    // 执行10ms任务
+    soft_process();
+    breath_value_Cal();
+    data_send();    
 }
+
+void task_20ms(void) {
+    // 执行20ms任务
+    adc_Cal();
+    display_trans();
+}
+
+void task_100ms(void) {
+    // 执行100ms任务
+    datatrans_deal();
+    closed_loop_control();     
+}
+
+void task_1000ms(void) {
+    // 执行1000ms任务
+    write_flash();        
+    LED = !LED;
+    print_task();     
+}
+
+// 定义任务结构体
+typedef struct {
+    uint32_t period;       // 任务执行周期
+    void (*task)(void);    // 任务回调函数
+    uint32_t cnt;           // 任务执行的间隔时间
+} Task;
+ 
+// 任务列表
+Task tasks[] = {
+    { 5, task_5ms, 0 },
+    { 10, task_10ms, 0 },
+    { 20, task_20ms, 0 },
+    { 100, task_100ms, 0 },
+    { 1000, task_1000ms, 0 }
+};
+
+void task_time(void)
+{
+    for (int i = 0; i < (sizeof(tasks) / sizeof(Task)); i++) {
+        tasks[i].cnt++;       // 执行任务
+    }
+}
+
+// 任务调度函数
+void task_scheduler( void ) {
+    for (int i = 0; i < (sizeof(tasks) / sizeof(Task)); i++) {
+        if ( tasks[i].cnt / tasks[i].period > 0) {
+            tasks[i].task();       // 执行任务
+            tasks[i].cnt = 0;
+        }
+    }
+}
+

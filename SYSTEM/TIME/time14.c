@@ -47,16 +47,14 @@ void TIM2_Configuration(void) // 1ms
     TIM_Cmd(TIM2, ENABLE);
 }
 
-
-uint32_t g_count = 0;
-uint32_t task_cnt = 0;
+uint32_t time_cnt = 0;
 void TIM2_IRQHandler(void)
 {
     if (TIM_GetITStatus(TIM2, TIM_IT_Update) != RESET)
     {
-        g_count++;
+        time_cnt++;
         timing_task();
-        task_time(task_cnt++);
+        task_time();
         TIM_ClearITPendingBit(TIM2, TIM_IT_Update);
     }
 }

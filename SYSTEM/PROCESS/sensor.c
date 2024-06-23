@@ -7,15 +7,6 @@ extern oxygen_t input;
 extern oxygen_t output;
 extern compressor_t machine;
 
-void zhjw_test(void)
-{
-    input.oxygen = rand() % 1000 / 10;
-    input.flow = rand() % 1000 / 10;
-    machine.rpm = rand() % 5000;
-
-    machine.err_code = rand() % 255;
-    output.oxygen = rand() % 1000 / 10;
-}
 /*线性方程线性转化*/
 void liner_cal(void)
 {
@@ -144,22 +135,19 @@ void display_trans(void)
 
 void datatrans_deal(void)
 {
-    static uint16_t i = 0;
-    modbus_dis[mixed_ki] = i++;
     compressor_set(modbus_dis[Compressor_setspeed], 0x00, 0x00, 0x00);
 }
 
 void set_sensor_value(void)
 {
     get_sensor_value();
-    modbus_dis[p_value_out] = 0;
     TIM_SetCompare1(TIM3, modbus_dis[fan_out]);     
     TIM_SetCompare2(TIM3, modbus_dis[p_value_out]); 
 }
 
 
 /**
- * PID控制算法函数
+ * PID控制算法函数 100ms调度周期
  * @param pid 指向PID控制器的指针
  * @param setpoint 设定值
  * @param input 当前输入值
@@ -178,7 +166,7 @@ uint16_t PID_cal(PIDController *pid, double setpoint, double input, uint16_t Kp,
     // 计算误差：设定值 - 当前输入值
     double error = setpoint - input;
     // 假设采样时间为1，实际应用中可能需要根据系统时钟来调整
-    pid->Timestamp = 1.0;
+    pid->Timestamp = 0.1;
     // 计算积分项，防止积分饱和
     double integral = pid->Integral + pid->Ki * error * pid->Timestamp;
     // 计算微分项
@@ -231,7 +219,7 @@ void pressure_closed(void)
     }
     else 
     {
-            modbus_dis[fan_out] = PID_cal(&pressure, modbus_dis[set_xi_pre], sensor.breath_pre, modbus_dis[pressure_kp], modbus_dis[pressure_ki], modbus_dis[pressure_kd]);
+            modbus_dis[fan_out] = PID_cal(&pressure, modbus_dis[set_pre], sensor.breath_pre, modbus_dis[pressure_kp], modbus_dis[pressure_ki], modbus_dis[pressure_kd]);
             if (sensor.breath_pre <= modbus_dis[set_xi_pre])
             {
                 FAN_BREAK_OFF;

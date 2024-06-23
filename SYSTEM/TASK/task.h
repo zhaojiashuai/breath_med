@@ -2,7 +2,7 @@
 #define _TASK_H
 #include "common.h"
 
-void task_time(uint32_t cnt);
-void task_run(void);
+void task_time(void);
+void task_scheduler(void);
 
 #endif

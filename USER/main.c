@@ -23,7 +23,6 @@ int main(void)
 
 	while (1)
 	{
-		task_run();
-		display_trans();
+		task_scheduler();
 	}
 }

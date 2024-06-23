@@ -7,9 +7,12 @@ int16_t State,StateLast,XiTryTime[10],XiTime[10],HuTime[10],XiTik,HuTik,StateTim
 /*转化数据传递*/
 void data_send(void)
 {
-    Hz = 20;//采集和计算频率
-    modbus_dis[set_xi_pre] = Set;//压力设定
+    Hz = 100;//采集和计算频率
     Flow = sensor.berath_value;//流量数值赋值
+    modbus_dis[set_pre] = Set;//压力设定
+    XiP = modbus_dis[set_xi_pre];//吸气压力赋值输出
+    HuP = modbus_dis[set_hu_pre];//呼气压力赋值输出
+    
     modbus_dis[xiqivalue_1] = XiSum[0];
     modbus_dis[xiqivalue_2] = XiSum[1];
     modbus_dis[xiqivalue_3] = XiSum[2];
@@ -23,7 +26,7 @@ void data_send(void)
     modbus_dis[huqivalue_5] = HuSum[4];
 }
 
-/*1000ms调度周期*/
+/*10ms调度周期--100hz*/
 void soft_process(void)
 {
     FlowD=Flow-FlowLast; //流量导数
@@ -77,7 +80,7 @@ void soft_process(void)
     FlowLast=Flow; FlowDLast=FlowD;    
 }
 
-/*20ms调用一次*/
+/*10ms调用一次*/
 void breath_value_Cal(void)
 {
     double ChaoQi,HuXiHz,XiHuBi;
