@@ -16,7 +16,6 @@ void task_10ms(void) {
 
 void task_20ms(void) {
     // 执行20ms任务
-    adc_Cal();
     display_trans();
 }
 

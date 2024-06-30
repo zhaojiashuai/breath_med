@@ -48,7 +48,7 @@ void TIM3_Int_Init(u16 arr, u16 psc)
     TIM_OC1PreloadConfig(TIM3, TIM_OCPreload_Enable);
 
     // 初始化TIM3通道2为PWM模式
-    TIM_OCInitStructure.TIM_OCMode = TIM_OCMode_PWM2;
+    TIM_OCInitStructure.TIM_OCMode = TIM_OCMode_PWM1;
     TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable;
     TIM_OCInitStructure.TIM_Pulse = 0;
     TIM_OCInitStructure.TIM_OCPolarity = TIM_OCPolarity_High;
@@ -77,8 +77,8 @@ void TIM3_Int_Init(u16 arr, u16 psc)
 
 void test_pwm(void)
 {
-    static uint16_t count = 250;
-    if (count > 500)
+    static uint16_t count = 50;
+    if (count > 100)
     {
         count = 0;
     }

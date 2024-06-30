@@ -51,6 +51,7 @@ void get_sensor_value(void)
     static filter_t breath_pre = {0}, berath_value = {0};
     double f = 0;
     liner_cal();
+    // f = (double)adc_bu[0]/32767*500;
     f = (double)adc_bu[0];
     f = sliding_average_filter(&breath_pre, f);
     f = f * sensor.k_pre + sensor.b_pre;
@@ -60,6 +61,7 @@ void get_sensor_value(void)
     sensor.breath_pre = (uint16_t)(f + 1000 - modbus_dis[breath_offset]); 
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // f = (double)adc_bu[1]/32767*500;
     f = (double)adc_bu[1];
     f = sliding_average_filter(&berath_value, f);
     f = f * sensor.k_valu + sensor.b_valu;
@@ -180,9 +182,9 @@ uint16_t PID_cal(PIDController *pid, double setpoint, double input, uint16_t Kp,
     // 更新积分项
     pid->Integral = integral;
     // 输出限幅，限制在0到500之间
-    if (pid->Output > 500)
+    if (pid->Output > 100)
     {
-        pid->Output = 500;
+        pid->Output = 100;
     }
     else if (pid->Output < 0)
     {
@@ -203,9 +205,9 @@ void mixed_closed(void)
 {
     static PIDController mixed = {0};
     modbus_dis[p_value_out] = PID_cal(&mixed, modbus_dis[mixed_setoxygen], output.oxygen, modbus_dis[mixed_kp], modbus_dis[mixed_ki], modbus_dis[mixed_kd]);
-    if (modbus_dis[p_value_out] > 500)
+    if (modbus_dis[p_value_out] > 100)
     {
-        modbus_dis[p_value_out] = 500;
+        modbus_dis[p_value_out] = 100;
     }
 }
 
@@ -219,21 +221,12 @@ void pressure_closed(void)
     }
     else 
     {
-            modbus_dis[fan_out] = PID_cal(&pressure, modbus_dis[set_pre], sensor.breath_pre, modbus_dis[pressure_kp], modbus_dis[pressure_ki], modbus_dis[pressure_kd]);
-            if (sensor.breath_pre <= modbus_dis[set_xi_pre])
-            {
-                FAN_BREAK_OFF;
-            }
-            else
-            {
-                FAN_BREAK_ON;
-            }
-        
+        modbus_dis[fan_out] = PID_cal(&pressure, Set, sensor.breath_pre, modbus_dis[pressure_kp], modbus_dis[pressure_ki], modbus_dis[pressure_kd]);  
     }
 
-    if (modbus_dis[fan_out] > 500)
+    if (modbus_dis[fan_out] > 100)
     {
-        modbus_dis[fan_out] = 500;
+        modbus_dis[fan_out] = 100;
     }
 }
 

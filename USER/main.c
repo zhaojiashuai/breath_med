@@ -10,9 +10,9 @@ int main(void)
 	bsp_InitAdcDMA(); // 初始化模数转换器（ADC）的DMA功能
 	Adc_Init(); // 初始化ADC
 	Init__ADS1115(); // 初始化ADS1115，可能是一个外部ADC模块
-	TIM3_Int_Init(500 - 1, 84 - 1); // 初始化定时器3，设置预分频为84-1，自动重装载值为500-1，生成2KHz的PWM信号
+	TIM3_Int_Init(100 - 1, 42 - 1); // 初始化定时器3，设置预分频为42-1，自动重装载值为100-1，生成20KHz的PWM信号
 	TIM2_Configuration(); // 配置定时器2
-	TIM4_Configuration(); // 配置定时器4
+	TIM4_Configuration(); // 配置定时器4 
 	uart_init(9600); // 初始化USART，设置波特率为9600
 	uart2_init(9600); // 初始化USART2，设置波特率为9600
 	uart3_init(9600); // 初始化USART3，设置波特率为9600
@@ -23,6 +23,7 @@ int main(void)
 
 	while (1)
 	{
+		adc_Cal();
 		task_scheduler();
 	}
 }

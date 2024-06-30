@@ -22,6 +22,6 @@ void gpio_init(void)
 
     // 设置风扇方向为顺时针
     FAN_DIR_CW;
-    // 打开风扇制动
-    FAN_BREAK_ON;
+    // 关闭风扇制动
+    FAN_BREAK_OFF;
 }
