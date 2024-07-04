@@ -27,7 +27,7 @@
 #include "stm32f4xx_rcc.h"
 #include "ADS1115.h"
 
-#define BUFFER_SIZE 10
+#define BUFFER_SIZE 11
 
 typedef struct common
 {

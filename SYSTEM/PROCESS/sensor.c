@@ -53,7 +53,7 @@ void get_sensor_value(void)
     liner_cal();
     // f = (double)adc_bu[0]/32767*500;
     f = (double)adc_bu[0];
-    f = sliding_average_filter(&breath_pre, f);
+    f = median_filter(&breath_pre, f);
     f = f * sensor.k_pre + sensor.b_pre;
     // f = -0.143224203722728*f*f*f+0.809567865321594*f*f+8091152612841201*f-5.13046589156455;
     // if(f<0) P=0;
@@ -63,7 +63,7 @@ void get_sensor_value(void)
     ////////////////////////////////////////////////////////////////////////////////////////////////////////
     // f = (double)adc_bu[1]/32767*500;
     f = (double)adc_bu[1];
-    f = sliding_average_filter(&berath_value, f);
+    f = median_filter(&berath_value, f);
     f = f * sensor.k_valu + sensor.b_valu;
     // f = 2.74273849138829*pow(f,7)-50.1823050124469*pow(f,6)+373.525387950575*pow(f,5)-1453.24303259627*pow(f,4)+3168.88268278098*pow(f,3)-3871.08286011955*pow(f,2)+2549.63479716526*f-827.709782903377;
     // if(f>150) f = 150;
