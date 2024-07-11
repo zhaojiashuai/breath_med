@@ -12,7 +12,8 @@ void uart3_init(u32 bound)
 {
     // 使能USART3时钟
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART3, ENABLE);
-
+    // 使能GPIOB时钟
+    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOB, ENABLE);
     // 初始化GPIOB引脚，用于USART3的TX和RX
     GPIO_InitTypeDef GPIO_InitStruct;
     GPIO_InitStruct.GPIO_Pin = GPIO_Pin_10 | GPIO_Pin_11; // USART3的TX和RX引脚

@@ -10,7 +10,8 @@ void uart4_init(u32 bound)
 {
     // 使能UART4时钟
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_UART4, ENABLE);
-
+    // 使能GPIOC时钟
+    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC, ENABLE);
     // 初始化GPIOC引脚，用于UART4的TX和RX
     GPIO_InitTypeDef GPIO_InitStruct;
     GPIO_InitStruct.GPIO_Pin = GPIO_Pin_10 | GPIO_Pin_11; // UART4的TX和RX引脚

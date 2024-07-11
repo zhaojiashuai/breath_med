@@ -179,18 +179,18 @@ void Acknowledge_1115(void)
   delay_iic();
 }
 
- void Confige1115 (u8 port)
+ void Confige1115 (u8 port)/*修改量程为最大*/
 {
 	static u8 chnel,i;
 	switch (port)
 		{
-    case 0: chnel=0xC2; 
+    case 0: chnel=0xC0; 
     break;
-    case 1:chnel=0xD2;
+    case 1:chnel=0xD0;
     break;
-		case 2:chnel=0xE2;
+		case 2:chnel=0xE0;
     break;
-    case 3:chnel=0xF2;
+    case 3:chnel=0xF0;
     break;
 		default:
     break;

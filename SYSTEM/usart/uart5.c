@@ -12,7 +12,7 @@ void uart5_init(u32 bound)
 {
     // 使能UART5时钟
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_UART5, ENABLE);
-
+    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC | RCC_AHB1Periph_GPIOD, ENABLE);
     // 初始化GPIOC和GPIOD引脚，用于UART5的TX和RX
     GPIO_InitTypeDef GPIO_InitStruct;
     GPIO_InitStruct.GPIO_Pin = GPIO_Pin_12; // UART5的TX引脚
