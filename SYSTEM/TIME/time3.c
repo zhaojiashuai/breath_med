@@ -40,7 +40,7 @@ void TIM3_Int_Init(u16 arr, u16 psc)
     TIM_TimeBaseInit(TIM3, &TIM_TimeBaseInitStructure);
 
     // 初始化TIM3通道1为PWM模式
-    TIM_OCInitStructure.TIM_OCMode = TIM_OCMode_PWM2;
+    TIM_OCInitStructure.TIM_OCMode = TIM_OCMode_PWM1;
     TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable;
     TIM_OCInitStructure.TIM_Pulse = 0;
     TIM_OCInitStructure.TIM_OCPolarity = TIM_OCPolarity_High;
@@ -56,7 +56,7 @@ void TIM3_Int_Init(u16 arr, u16 psc)
     TIM_OC2PreloadConfig(TIM3, TIM_OCPreload_Enable);
 
     // 初始化TIM3通道3为PWM模式
-    TIM_OCInitStructure.TIM_OCMode = TIM_OCMode_PWM2;
+    TIM_OCInitStructure.TIM_OCMode = TIM_OCMode_PWM1;
     TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable;
     TIM_OCInitStructure.TIM_Pulse = 0;
     TIM_OCInitStructure.TIM_OCPolarity = TIM_OCPolarity_High;
