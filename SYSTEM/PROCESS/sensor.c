@@ -143,7 +143,8 @@ void datatrans_deal(void)
 void set_sensor_value(void)
 {
     get_sensor_value();
-    TIM_SetCompare1(TIM3, 100-modbus_dis[fan_out]);  //此处注意PWM的上下限 查看下是否有上下限的问题
+    TIM_SetCompare1(TIM3, modbus_dis[fan_out]);     
+    TIM_SetCompare2(TIM3, modbus_dis[p_value_out]); 
 }
 
 
